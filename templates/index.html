@@ -1,0 +1,55 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+
+<div class="container" style="font-family: 'Poppins', sans-serif; margin-top: 32px; text-align: center;">
+    <h1>Novità</h1>
+    {{ owner }}
+
+    <!-- slider with collectibles -->
+    <div class="glide" style="padding-bottom: 64px;">
+        <div class="glide__track" data-glide-el="track">
+            <ul class="glide__slides">
+                {% for collectible in collectibles %}
+                <li class="glide__slide">
+                    {% include 'collectible_card.html' %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div style="background-color: #E8E8E8; border-radius: 10px; padding: 4px;"
+            class="slider__bullets glide__bullets" data-glide-el="controls[nav]">
+            {% for collectible in collectibles %}
+            {% if (loop.index) <= collectibles|length-2 %} <button class="slider__bullet glide__bullet"
+                data-glide-dir="={{ loop.index - 1 }}"></button>
+                {% endif %}
+                {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    new Glide('.glide', {
+        type: 'slider',
+        startAt: 0,
+        perView: 4,
+        gap: 50,
+        bound: true,
+        autoplay: 5000,
+        breakpoints: {
+            640: {
+                perView: 2,
+                gap: 0
+            },
+            1000: {
+                perView: 2
+            }
+        }
+
+    }).mount()
+</script>
+
+</body>
