@@ -1,7 +1,7 @@
 import os
 import random
 from flask import Blueprint, abort, jsonify, render_template, request
-from nft_contract import nft
+from nft_contract import nft, local_account, contract_address, w3
 
 
 home = Blueprint("home", __name__)
@@ -29,8 +29,18 @@ def mint():
         # fake post requests
         abort(444)
     id = int(collectible[:-4])
-    print(id)
-    nft.functions.mint(id, collectible).call()
+
+    bid_txn_dict = {
+            'from': local_account.address,
+            'to': contract_address,
+            'value': w3.toWei(10, "ether"),
+            'gas': 2000000,
+            'gasPrice': w3.toWei('40', 'gwei')
+        }
+    bid_txn_hash = nft.functions.mint(id, collectible).transact(bid_txn_dict)
+    bid_txn_receipt = w3.eth.waitForTransactionReceipt(bid_txn_hash)
+    print(bid_txn_receipt)
+
     owner = nft.functions.ownerOf(id).call()
     
     print(owner)
