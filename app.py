@@ -9,7 +9,7 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 print(w3.isConnected())
 
 # Initialize a local account object from the private key of a valid Ethereum node address
-local_acct = w3.eth.account.from_key("0xce49fc69dea28c89511c2f87fa57c3c7a651886670c5c8b739b160b73164f377")
+local_acct = w3.eth.account.from_key("0x02cf8e2add34d70cd0a99446ce5d930a13be817696c9a5ae2bef922ebc9d2d7a")
 
 # compile your smart contract with truffle first
 truffleFile = json.load(open('./build/contracts/NFT.json'))
@@ -41,12 +41,13 @@ contract_address = tx_receipt['contractAddress']
 # Initialize a contract instance object using the contract address which can be used to invoke contract functions
 contract_instance = w3.eth.contract(abi=abi, address=contract_address)
 
-
 def create_app(config="config.Development"):
     from views.home import home
+    from views.auth import auth
     app = Flask(__name__)
     app.config.from_object(config)
     app.register_blueprint(home)
+    app.register_blueprint(auth)
     return app
 
 if __name__ == '__main__':
