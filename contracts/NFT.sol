@@ -19,7 +19,7 @@ contract NFT is ERC721 {
     // owner of the token - addresses that are approved to send the nft
     mapping(address => mapping(address => bool)) approvedForAll;
 
-    function mint(uint256 _tokenId, string memory _collectible) public {
+    function mint(uint256 _tokenId, string memory _collectible) public payable {
         require(owners[_tokenId] == address(0), "Token already minted");
         owners[_tokenId] = msg.sender;
         attributes[_tokenId] = _collectible;
