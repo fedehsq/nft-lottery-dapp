@@ -1,15 +1,12 @@
 import json
-import sys
 from web3 import Web3, HTTPProvider
-from flask import Flask, render_template, request
+from flask import Flask
 
 # create a web3.py instance w3 by connecting to the local Ethereum node
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 
-print(w3.isConnected())
-
 # Initialize a local account object from the private key of a valid Ethereum node address
-local_acct = w3.eth.account.from_key("0x02cf8e2add34d70cd0a99446ce5d930a13be817696c9a5ae2bef922ebc9d2d7a")
+local_acct = w3.eth.account.from_key("0xd6470dcf52e598e05047312f6abc87d71201f55ec5d1f762965cb913f0240bfb")
 
 # compile your smart contract with truffle first
 truffleFile = json.load(open('./build/contracts/NFT.json'))
@@ -31,7 +28,6 @@ signed = w3.eth.account.sign_transaction(construct_txn, local_acct.key)
 
 # broadcast the signed transaction to your local network using sendRawTransaction() method and get the transaction hash
 tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
-print(tx_hash.hex())
 
 # collect the Transaction Receipt with contract address when the transaction is mined on the network
 tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
@@ -41,13 +37,16 @@ contract_address = tx_receipt['contractAddress']
 # Initialize a contract instance object using the contract address which can be used to invoke contract functions
 contract_instance = w3.eth.contract(abi=abi, address=contract_address)
 
+
 def create_app(config="config.Development"):
     from views.home import home
     from views.auth import auth
+    import auth as lm
     app = Flask(__name__)
     app.config.from_object(config)
     app.register_blueprint(home)
     app.register_blueprint(auth)
+    lm.init_login_manager(app)
     return app
 
 if __name__ == '__main__':

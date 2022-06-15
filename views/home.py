@@ -1,16 +1,14 @@
 import os
-import random
 from flask import (
     Blueprint,
     abort,
     flash,
-    jsonify,
     redirect,
     render_template,
     request,
-    session,
     url_for,
 )
+from flask_login import login_required
 from app import local_acct, contract_address, w3, contract_instance
 from processors.nft_collectible import NftCollectible
 
@@ -24,9 +22,6 @@ images = [
 
 @home.route("/", methods=["GET", "POST"])
 def index():
-    if not session.get('address'):
-        flash("Please authenticate", "danger")
-        return redirect(url_for("auth.login"))
     # get ten random collectibles from the static folder
     collectibles = [
         NftCollectible(
@@ -38,8 +33,13 @@ def index():
     ]
     return render_template("index.html", collectibles=collectibles)
 
+@home.route("/accounts", methods=["GET"])
+def accounts():
+    return render_template("accounts.html", accounts=w3.eth.accounts)
+
 
 @home.route("/mint", methods=["POST"])
+@login_required
 def mint():
     collectible = request.form.get("collectible")
     id = request.form.get("collectibleId")

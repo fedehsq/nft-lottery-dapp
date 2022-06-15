@@ -1,0 +1,11 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="container" style="margin-top: 64px;">
+    <h1>Accounts</h1>
+    <ul class="list-group">
+        {% for account in accounts %}
+        <li class="list-group-item">{{ account }}</li>
+      </ul>
+    {% endfor %}
+</div> 
