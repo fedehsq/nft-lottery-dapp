@@ -1,17 +1,25 @@
 from flask_login import UserMixin, LoginManager
-from app import w3
+from app import w3, owner
+import enum
+
+class Role(enum.Enum):
+    MANAGER = 'MANAGER'
+    USER = 'USER'
+
+    def __str__(self):
+        return str(self.value)
 
 """
 Lightweight class for representing a user.
 """
 class User(UserMixin):
     
-    def __init__(self, address):
+    def __init__(self, address: str, role: Role):
         self.id = address
+        self.role = role
     
     def __repr__(self):
-        return f"User('{self.id}')"
-
+        return f"User({self.id}, {self.role})"
 
 def init_login_manager(app):
     login_manager = LoginManager(app)
@@ -28,7 +36,7 @@ def init_login_manager(app):
         accounts = w3.eth.accounts
         for account in accounts:
             if account == user_id:
-                return User(account)
+                return User(account, Role.USER if account != owner else Role.MANAGER)
 
     return login_manager
     
