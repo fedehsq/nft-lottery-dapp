@@ -1,13 +1,14 @@
+import threading
+import time
+from flask_executor import Executor
 import json
 from web3 import Web3, HTTPProvider
 from flask import Flask
 
 # create a web3.py instance w3 by connecting to the local Ethereum node
 w3 = Web3(HTTPProvider("http://localhost:8545"))
-
 # Initialize a local account object from the private key of a valid Ethereum node address
-owner = w3.eth.account.from_key("0x46818ea21b18213658f826b612d7bddf01e7cf07a7c30018e89e3a3dcb816bed")
-
+owner = w3.eth.account.from_key("0x8f90ca541e8ac1d4758f434a2206b3a230b4b6dac2a166451ffcd75ad5441f50")
 def deploy_contract(contract_name):
     # compile your smart contract with truffle first
     truffleFile = json.load(open('./build/contracts/' + contract_name + '.json'))
@@ -40,8 +41,10 @@ def deploy_contract(contract_name):
     return contract_address, contract_instance
 
 nft_address, nft_instance = deploy_contract('NFT')
+event_filter = nft_instance.events.Transfer.createFilter(fromBlock=1, toBlock='latest')
 
 
+executor = Executor() 
 def create_app(config="config.Development"):
     from views.home import home
     from views.auth import auth
@@ -51,9 +54,38 @@ def create_app(config="config.Development"):
     app.register_blueprint(home)
     app.register_blueprint(auth)
     lm.init_login_manager(app)
+    executor.init_app(app)
+    
+    @app.before_first_request
+    def before_first_request():
+        register.submit()
+    
     return app
+
+
+@executor.job
+def register():
+    from app import event_filter
+    while True:
+        print("thread")
+        print(event_filter)
+        print(event_filter.get_new_entries())
+        print(event_filter.get_all_entries())
+
+        time.sleep(2)
+
+
+
+
+"""@app.route('/decorate_fib')
+def decorate_fib():
+    fib.submit(5)
+    fib.submit_stored('fibonacci', 5)
+    fib.map(range(1, 6))
+    return 'OK'"""
 
 if __name__ == '__main__':
     from config import Development
     app = create_app(config=Development)
+    
     app.run(debug=True)

@@ -23,6 +23,7 @@ images = [
 @home.route("/", methods=["GET", "POST"])
 def index():
     # get ten random collectibles from the static folder
+
     collectibles = [
         NftCollectible(
             id=int(collectible[:-4]),
@@ -41,6 +42,7 @@ def accounts():
 @home.route("/mint", methods=["POST"])
 @login_required
 def mint():
+    global nft_instance
     collectible = request.form.get("collectible")
     id = request.form.get("collectibleId")
     # user wants to apply a promo
@@ -72,6 +74,7 @@ def mint():
 
 @home.route("/nft-operations", methods=["GET", "POST"])
 def exec():
+    global nft_instance
     if request.method == "GET":
         return render_template("nft_operations.html")
     operation = request.form.get("operation")
@@ -99,13 +102,11 @@ def exec():
                 "gas": 2000000,
                 "gasPrice": w3.toWei("40", "gwei"),
             }
-            tx_hash = nft_instance.functions.transferFrom1(
+            tx_hash = nft_instance.functions.transferFrom(
                 _from, to, int(token_id)
             ).transact(tx)
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
-            owner = nft_instance.functions.ownerOf(int(token_id)).call()
-            print(owner)
         except Exception as e:
             print(e.args[0])
            
