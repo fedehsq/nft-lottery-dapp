@@ -10,7 +10,7 @@ from config import Development
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 # Initialize a local account object from the private key of a valid Ethereum node address
 owner = w3.eth.account.from_key(
-    "0xe1476d58f7c3443fcdcf0cbfe79e1f3913a4ce1fc33b79aab9e0316744add4b5"
+    "0x96d63edb92a1815e6fcd51b3ec2bd91c634feea5248da7521a60a0f94f4cd3fe"
 )
 
 nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")

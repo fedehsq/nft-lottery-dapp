@@ -12,7 +12,7 @@
         <p style="text-align: center;" class="card-text">Owner: <span style="font-weight: bold; font-size: small;">{{
                 collectible.owner }}</span></p>
         {% if current_user.is_authenticated %}
-        <form method="post" action="/mint">
+        <form method="post" action="nft-operations/mint">
             <input id="collectibleId" name="collectibleId" type="hidden" value="{{ collectible.id }}">
             <input id="collectible" name="collectible" type="hidden" value="{{ collectible.collectible }}">
 

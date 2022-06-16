@@ -33,7 +33,7 @@ def mint():
         flash("Collectible minted successfully", "success")
     else:
         flash("Error during minting")
-    return redirect(url_for(".index"))
+    return redirect(url_for("home.index"))
 
 
 @contract_functions.route("/nft-operations/transfer-from", methods=["POST"])
@@ -52,7 +52,7 @@ def transfer_from():
     # Transfer a collectible
     tx_result = ContractProcessor.transfer_from(_from, to, int(token_id))
     if tx_result:
-        flash("Collectible minted successfully", "success")
+        flash("Token transfered successfully", "success")
     else:
-        flash("Error during minting")
-    return redirect(url_for(".index"))
+        flash("Error during transfer from")
+    return redirect(url_for(".nft_operations"))
