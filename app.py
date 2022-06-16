@@ -1,91 +1,64 @@
-import threading
-import time
+from time import sleep
 from flask_executor import Executor
-import json
 from web3 import Web3, HTTPProvider
 from flask import Flask
+from processors.contract import ContractProcessor
+from config import Development
+
 
 # create a web3.py instance w3 by connecting to the local Ethereum node
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 # Initialize a local account object from the private key of a valid Ethereum node address
-owner = w3.eth.account.from_key("0x8f90ca541e8ac1d4758f434a2206b3a230b4b6dac2a166451ffcd75ad5441f50")
-def deploy_contract(contract_name):
-    # compile your smart contract with truffle first
-    truffleFile = json.load(open('./build/contracts/' + contract_name + '.json'))
-    abi = truffleFile['abi']
-    bytecode = truffleFile['bytecode']
+owner = w3.eth.account.from_key(
+    "0xe1476d58f7c3443fcdcf0cbfe79e1f3913a4ce1fc33b79aab9e0316744add4b5"
+)
 
-    # Initialize a contract object with the smart contract compiled artifacts
-    contract = w3.eth.contract(bytecode=bytecode, abi=abi)
+nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
+event_filter = nft_instance.events.Transfer.createFilter(fromBlock=1, toBlock="latest")
 
-    # build a transaction by invoking the buildTransaction() method from the smart contract constructor function
-    construct_txn = contract.constructor(3000, '0xb95A8c720bbDD408f97CccF07de6ceD493bDbc74').buildTransaction({
-        'from': owner.address,
-        'nonce': w3.eth.getTransactionCount(owner.address),
-        'gas': 1728712,
-        'gasPrice': w3.toWei('21', 'gwei')})
+executor = Executor()
 
-    # sign the deployment transaction with the private key
-    signed = w3.eth.account.sign_transaction(construct_txn, owner.key)
-
-    # broadcast the signed transaction to your local network using sendRawTransaction() method and get the transaction hash
-    tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
-
-    # collect the Transaction Receipt with contract address when the transaction is mined on the network
-    tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-    print("Contract Deployed At:", tx_receipt['contractAddress'])
-    contract_address = tx_receipt['contractAddress']
-
-    # Initialize a contract instance object using the contract address which can be used to invoke contract functions
-    contract_instance = w3.eth.contract(abi=abi, address=contract_address)
-    return contract_address, contract_instance
-
-nft_address, nft_instance = deploy_contract('NFT')
-event_filter = nft_instance.events.Transfer.createFilter(fromBlock=1, toBlock='latest')
-
-
-executor = Executor() 
+"""
+Create the flask app register the blueprints, 
+and initialize the executor.
+"""
 def create_app(config="config.Development"):
     from views.home import home
     from views.auth import auth
+    from views.contract_functions import contract_functions
     import auth as lm
+
     app = Flask(__name__)
     app.config.from_object(config)
     app.register_blueprint(home)
     app.register_blueprint(auth)
+    app.register_blueprint(contract_functions)
     lm.init_login_manager(app)
     executor.init_app(app)
-    
+
     @app.before_first_request
     def before_first_request():
-        register.submit()
-    
+        listen_for_events.submit()
+
     return app
 
 
+"""
+Thread that listens for events on the blockchain.
+"""
 @executor.job
-def register():
+def listen_for_events():
     from app import event_filter
-    while True:
-        print("thread")
-        print(event_filter)
-        print(event_filter.get_new_entries())
-        print(event_filter.get_all_entries())
+    from flask import session
+    i = 0
+    #while True:
+    #    i += 1
+    #    session["event_count"] = i
+    #    #print(event_filter.get_new_entries())
+    #    #print(event_filter.get_all_entries())
+    #    sleep(10)
 
-        time.sleep(2)
 
-
-
-
-"""@app.route('/decorate_fib')
-def decorate_fib():
-    fib.submit(5)
-    fib.submit_stored('fibonacci', 5)
-    fib.map(range(1, 6))
-    return 'OK'"""
-
-if __name__ == '__main__':
-    from config import Development
+if __name__ == "__main__":
     app = create_app(config=Development)
-    
     app.run(debug=True)
