@@ -4,7 +4,7 @@ from flask_login import current_user
 class ContractProcessor:
 
     @staticmethod
-    def deploy_contract(contract_name):
+    def deploy_contract(contract_name, *constructor_args):
         from app import w3, owner
         # compile your smart contract with truffle first
         truffle_file = json.load(open('./build/contracts/' + contract_name + '.json'))
@@ -15,7 +15,7 @@ class ContractProcessor:
         contract = w3.eth.contract(bytecode=bytecode, abi=abi)
 
         # build a transaction by invoking the buildTransaction() method from the smart contract constructor function
-        construct_txn = contract.constructor(3000, '0xb95A8c720bbDD408f97CccF07de6ceD493bDbc74').buildTransaction({
+        construct_txn = contract.constructor(*constructor_args).buildTransaction({
             'from': owner.address,
             'nonce': w3.eth.getTransactionCount(owner.address),
             'gas': 1728712,
@@ -31,6 +31,7 @@ class ContractProcessor:
         tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
         print("Contract Deployed At:", tx_receipt['contractAddress'])
         contract_address = tx_receipt['contractAddress']
+        print(contract_address)
 
         # Initialize a contract instance object using the contract address which can be used to invoke contract functions
         contract_instance = w3.eth.contract(abi=abi, address=contract_address)
