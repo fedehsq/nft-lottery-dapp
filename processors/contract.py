@@ -42,10 +42,10 @@ class ContractProcessor:
     """
     @staticmethod
     def mint(id: int, collectible: str):
-        from app import w3, nft_instance
+        from app import w3, lottery_instance
         try:
             tx = ContractProcessor.create_transaction()
-            tx_hash = nft_instance.functions.mint(int(id), collectible).transact(
+            tx_hash = lottery_instance.functions.mint(int(id), collectible).transact(
                 tx
             )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
@@ -76,11 +76,11 @@ class ContractProcessor:
     """
     @staticmethod
     def create_transaction():
-        from app import w3, nft_address
+        from app import w3, lottery_address
         wei = w3.toWei(10, "ether")
         tx = {
             "from": current_user.id,
-            "to": nft_address,
+            "to": lottery_address,
             "value": wei,
             "gas": 2000000,
             "gasPrice": w3.toWei("40", "gwei"),

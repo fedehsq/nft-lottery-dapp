@@ -9,19 +9,21 @@ from flask import (
 )
 from flask_login import login_required
 from app import w3
+from auth import owner_required
 from processors.contract import ContractProcessor
 
 
-contract_functions = Blueprint("contract_functions", __name__)
+lottery = Blueprint("lottery", __name__)
 
 
-@contract_functions.route("/nft-operations", methods=["GET"])
-def nft_operations():
-    return render_template("nft_operations.html")
+@lottery.route("/lottery", methods=["GET"])
+def lottery_home():
+    return render_template("lottery.html")
 
 
-@contract_functions.route("/nft-operations/mint", methods=["POST"])
+@lottery.route("/lottery/mint", methods=["POST"])
 @login_required
+@owner_required
 def mint():
     collectible = request.form.get("collectible")
     id = request.form.get("collectibleId")
@@ -36,7 +38,7 @@ def mint():
     return redirect(url_for("home.index"))
 
 
-@contract_functions.route("/nft-operations/transfer-from", methods=["POST"])
+"""@lottery.route("/lottery/transfer-from", methods=["POST"])
 @login_required
 def transfer_from():
     _from = request.form.get("from")
@@ -47,7 +49,7 @@ def transfer_from():
 
     if not w3.isAddress(_from) or not w3.isAddress(to):
         flash("Invalid address", "danger")
-        return redirect(url_for(".nft-operations"))
+        return redirect(url_for(".lottery"))
 
     # Transfer a collectible
     tx_result = ContractProcessor.transfer_from(_from, to, int(token_id))
@@ -55,4 +57,4 @@ def transfer_from():
         flash("Token transfered successfully", "success")
     else:
         flash("Error during transfer from")
-    return redirect(url_for(".nft_operations"))
+    return redirect(url_for(".lottery"))"""

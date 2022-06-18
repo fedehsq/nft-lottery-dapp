@@ -1,6 +1,8 @@
-from flask_login import UserMixin, LoginManager
+from flask import flash, redirect, url_for
+from flask_login import UserMixin, LoginManager, current_user
 from app import w3, owner
 import enum
+from functools import wraps
 
 class Role(enum.Enum):
     MANAGER = 'MANAGER'
@@ -21,6 +23,15 @@ class User(UserMixin):
     def __repr__(self):
         return f"User({self.id}, {self.role})"
 
+def owner_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.role == Role.USER:
+            flash("Only the owner can perform this operation")
+            return redirect(url_for("home.index"))
+        return f(*args, **kwargs)
+    return decorated_function
+
 def init_login_manager(app):
     login_manager = LoginManager(app)
     login_manager.login_view = "auth.login"
@@ -36,6 +47,8 @@ def init_login_manager(app):
         accounts = w3.eth.accounts
         for account in accounts:
             if account == user_id:
+                print('loggo')
+                print(user_id)
                 return User(account, Role.USER if account != owner else Role.MANAGER)
 
     return login_manager

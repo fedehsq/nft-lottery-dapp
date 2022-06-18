@@ -7,6 +7,14 @@ from flask import session
 from app import w3, nft_instance
 from flask import jsonify
 from processors.nft_collectible import NftCollectible
+from app import (
+    lottery_closed_event,
+    lottery_created_event,
+    round_opened_event,
+    ticket_bought_event,
+    winning_numbers_drawn,
+    token_minted_event,
+)
 
 
 home = Blueprint("home", __name__)
@@ -33,17 +41,34 @@ def index():
         )
         for collectible in images[10:20]
     ]
-    return render_template("index.html", collectibles=collectibles,slideshow_collectibles=slideshow_collectibles)
+    return render_template(
+        "index.html",
+        collectibles=collectibles,
+        slideshow_collectibles=slideshow_collectibles,
+    )
 
 
 @home.route("/accounts", methods=["GET"])
 def accounts():
     return render_template("accounts.html", accounts=w3.eth.accounts)
 
+
 @home.route("/notifications", methods=["GET"])
 def notifications():
-    from app import event_filter
-    events_entries = event_filter.get_new_entries()
+    # get all events from the lottery contract
+    events_entries = (
+        lottery_created_event.get_new_entries()
+        + lottery_closed_event.get_new_entries()
+        + round_opened_event.get_new_entries()
+        + ticket_bought_event.get_new_entries()
+        + winning_numbers_drawn.get_new_entries()
+        + token_minted_event.get_new_entries()
+    )
+
+    print(events_entries)
+    print(events_entries)
+    print(events_entries)
+
     if len(events_entries) > 0:
         events = [event.get("event") for event in events_entries]
         return jsonify(status=200, events=events)

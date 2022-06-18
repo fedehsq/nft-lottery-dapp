@@ -11,8 +11,13 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 owner = w3.eth.account.from_key(
-    "0xb483ca44cbb4dbf6f466a48eedf62f1a8c9e08abc028681e330c2c8b41f99683"
+    "0xda1f57d425880fa77cfb08983dc928012902f18c146b73fffeae1aa8a3ba3086"
 )
+
+print(owner.address)
+print(owner.address)
+print(owner.address)
+print(owner.address)
 
 # Nft contract address and ABI
 nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
@@ -20,6 +25,11 @@ nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
 # Lottery contract address and ABI (pass Nft contract address as parameter)
 lottery_address, lottery_instance = ContractProcessor.deploy_contract(
     "Lottery", nft_address, 2
+)
+
+# Filter for Lottery events
+lottery_created_event = lottery_instance.events.LotteryCreated.createFilter(
+    fromBlock=1, toBlock="latest"
 )
 
 # Filter for Lottery events
@@ -33,20 +43,19 @@ lottery_closed_event = lottery_instance.events.LotteryClosed.createFilter(
 )
 
 # Filter for Lottery events
-round_opened_event = lottery_instance.events.TokenMinted.createFilter(
+token_minted_event = lottery_instance.events.TokenMinted.createFilter(
     fromBlock=1, toBlock="latest"
 )
 
 # Filter for Lottery events
-round_opened_event = lottery_instance.events.TicketBought.createFilter(
+ticket_bought_event = lottery_instance.events.TicketBought.createFilter(
     fromBlock=1, toBlock="latest"
 )
 
 # Filter for Lottery events
-round_opened_event = lottery_instance.events.WinningNumbersDrawn.createFilter(
+winning_numbers_drawn = lottery_instance.events.WinningNumbersDrawn.createFilter(
     fromBlock=1, toBlock="latest"
 )
-
 
 
 executor = Executor()
@@ -60,14 +69,14 @@ and initialize the executor.
 def create_app(config="config.Development"):
     from views.home import home
     from views.auth import auth
-    from views.contract_functions import contract_functions
+    from views.lottery import lottery
     import auth as lm
 
     app = Flask(__name__)
     app.config.from_object(config)
     app.register_blueprint(home)
     app.register_blueprint(auth)
-    app.register_blueprint(contract_functions)
+    app.register_blueprint(lottery)
     lm.init_login_manager(app)
     executor.init_app(app)
 

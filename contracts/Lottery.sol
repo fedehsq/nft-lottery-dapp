@@ -17,6 +17,9 @@ contract Lottery {
         string image;
     }
 
+    /// Lttery is created by the owner of the contract
+    event LotteryCreated();
+
     /// Round is open
     event RoundOpened(uint256 _startingBlock, uint256 _finalBlock);
 
@@ -56,13 +59,13 @@ contract Lottery {
 
     address public manager;
     uint256 public roundDuration;
-    uint256 private endRoundBlock;
+    uint256 private endRoundBlock = 0;
     uint256 private kParam = 0;
     uint256 private tokenId = 0;
 
-    bool private lotteryActive;
-    bool private numbersExtracted;
-    bool private roundFinished;
+    bool private lotteryActive = false;
+    bool private numbersExtracted = true;
+    bool private roundFinished = true;
 
     uint256 public constant TICKET_PRICE = 1 ether;
 
@@ -84,9 +87,7 @@ contract Lottery {
         nft = NFT(_nftAddress);
         roundDuration = _roundDuration;
         lotteryActive = true;
-        // Open the furst new round
-        endRoundBlock = block.number + roundDuration + 1;
-        emit RoundOpened(block.number, endRoundBlock);
+        emit LotteryCreated();
     }
 
     /// @notice The lottery operator can open a new round.
