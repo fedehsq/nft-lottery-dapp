@@ -1,22 +1,25 @@
 from flask import flash, redirect, url_for
 from flask_login import UserMixin, LoginManager, current_user
-from app import w3, owner
+from app import w3, manager
 import enum
 from functools import wraps
 
-"""
-Lightweight class for representing a user.
-"""
+
 class User(UserMixin):
-    
-    def __init__(self, address: str, is_admin: bool):
+    """
+    Lightweight class for representing a user address.
+    """    
+    def __init__(self, address: str, is_manager: bool):
         self.id = address
-        self.is_admin = is_admin
+        self.is_admin = is_manager
     
     def __repr__(self):
         return f"User({self.id}, {self.is_admin})"
 
-def owner_required(f):
+def manager_required(f):
+    """
+    Decorator for views that require the user to be the manager of the contract.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
@@ -26,6 +29,9 @@ def owner_required(f):
     return decorated_function
 
 def init_login_manager(app):
+    """
+    Initialize the login manager.
+    """
     login_manager = LoginManager(app)
     login_manager.login_view = "auth.login"
     login_manager.login_message = u"Please login to perform this operation."
@@ -40,7 +46,7 @@ def init_login_manager(app):
         accounts = w3.eth.accounts
         for account in accounts:
             if account == user_id:
-                return User(account, True if account == owner.address else False)
+                return User(account, True if account == manager.address else False)
 
     return login_manager
     

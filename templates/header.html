@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm//@glidejs/glide/dist/css/glide.theme.min.css">
 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
     <style>
         .carousel-indicators li {
             background-color: #6C63FF;
@@ -46,7 +48,7 @@
 
     
     <script>
-        /* reload notification every 10 seconds
+        // reload notification every 10 seconds
         $(document).ready(function () {
             setInterval(function () {
                 $.ajax({
@@ -55,12 +57,16 @@
                         if (response['status'] == 200) {
                             // Get the notifications of contract events
                             var events = response['events'];
+                            var non_read_events = response['non_read_events'];
+                            // Create the notification
+                            $('#notifications-count').text(non_read_events.length)
                             for (var i = 0; i < events.length; i++) {
                                 var event = events[i];
-                                var event_html = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                var event_html = '<div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 8px">' +
                                     '<strong>' + event + '</strong>' +
                                     '</div>';
                                 $('#notifications').append(event_html);
+                                $('#notifications-body').append(event)
                             }
                             // Remove the notifications of contract events after 10 seconds
                             setTimeout(function () {
@@ -71,7 +77,21 @@
                 });
 
             }, 10000);
-        });*/
+        });
+    </script>
+
+    <script>
+        $(document).on('click', "#delete-notifications-btn", function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "GET",
+                url: "/notifications/delete-all",
+                success: function(result) {
+                    $("#notifications-count").empty();
+                    $("#notifications-body").empty();
+                },
+            });
+        });
     </script>
 
 </head>

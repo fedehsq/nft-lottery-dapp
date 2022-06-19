@@ -1,20 +1,18 @@
 import os
 import random
-from time import sleep
-from flask_executor import Executor
 from web3 import Web3, HTTPProvider
 from flask import Flask
 from processors.contract import ContractProcessor
 from config import Development
-from processors.nft_collectible import NftCollectible
+from helpers.nft_collectible import NftCollectible
 
 
 # create a web3.py instance w3 by connecting to the local Ethereum node
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
-owner = w3.eth.account.from_key(
-    "0x320d83b7542d14beb24f90659840594dd404c10f9c2c2ef02ac3e159942c2906"
+manager = w3.eth.account.from_key(
+    "0x888cb9673068bde93d8ff318fab23fbde849cbd1af94a260ce0f68a37124f433"
 )
 
 # Nft contract address and ABI
@@ -96,6 +94,5 @@ def create_app(config="config.Development"):
 
 
 if __name__ == "__main__":
-    print("qua")
     app = create_app(config=Development)
     app.run(debug=True)

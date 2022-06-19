@@ -9,7 +9,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_user
-from app import w3, owner
+from app import w3, manager
 from auth import User
 
 auth = Blueprint("auth", __name__)
@@ -25,7 +25,7 @@ def login():
     if w3.isAddress(address):
         session['address'] = address
         flash("Successfully authenticated", "success")
-        u = User(address, True if address == owner.address else False)
+        u = User(address, True if address == manager.address else False)
         login_user(u)
         print(u)
         return redirect(url_for("home.index"))

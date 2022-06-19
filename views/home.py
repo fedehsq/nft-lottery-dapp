@@ -2,6 +2,7 @@ import os
 from flask import (
     render_template,
     Blueprint,
+    session,
 )
 from app import w3, COLLECTIBLES
 from flask import jsonify
@@ -17,11 +18,9 @@ from app import (
 
 home = Blueprint("home", __name__)
 
+
 @home.route("/", methods=["GET", "POST"])
 def index():
-    from app import nft_address, lottery_address
-    print(nft_address)
-    print(lottery_address)
     return render_template(
         "index.html",
         collectibles=[COLLECTIBLES.get(key) for key in range(1, 10)],
@@ -46,12 +45,17 @@ def notifications():
         + token_minted_event.get_new_entries()
     )
 
-    print(events_entries)
-    print(events_entries)
-    print(events_entries)
-
     if len(events_entries) > 0:
         events = [event.get("event") for event in events_entries]
-        return jsonify(status=200, events=events)
+        session["events"] = session.get("events", []) + events
+        return jsonify(
+            status=200, events=events, non_read_events=session.get("events", [])
+        )
     else:
         return jsonify(status=204)
+
+
+@home.route("/notifications/delete-all", methods=["GET"])
+def delete_notifications():
+    session.pop("events", None)
+    return jsonify(status=200)

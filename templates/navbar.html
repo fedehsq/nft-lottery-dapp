@@ -1,4 +1,4 @@
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" style="font-family: 'Poppins', sans-serif;;">
     <nav class="navbar sticky-top navbar-expand-md navbar-light" style="background-color: white;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); font-family: 'Poppins', sans-serif;">
         <a class="navbar-brand" href="/" style="margin-left: 20px;">
@@ -18,11 +18,35 @@
                     Nft Operations
                 </a>
             </li>
-            <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
-                <a class="nav-link" href="" role="button">
-                    Contatti
-                </a>
+
+            <li class="nav-item dropdown">
+                <div class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
+                    <div class="badge" id="notifications-count" style="position: absolute; top: -8px; left: 28px;">
+                        {% if session['events']|length > 0 %}
+                        {{ session['events']|length }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="dropdown-menu" id="notifications-body" aria-labelledby="navbarDropdown"
+                    style="padding: 2px; text-align: center;">
+
+                    {% for notification in session['events'] %}
+                    {{ notification }}
+                    <hr class="divider">
+                    {% endfor %}
+                    {% if session['events']|length > 0 %}
+                            <button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none;" type="button"
+                                class="btn btn-primary">Delete</button>
+                    {% endif %}
+                </div>
             </li>
+
+
+
             <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
                 <a class="nav-link" href="" role="button">
                     Contatti
@@ -48,5 +72,5 @@
 
     <!-- Notifications appended by jquery -->
     <div id="notifications">
-        
+
     </div>

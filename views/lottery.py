@@ -9,8 +9,9 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from app import COLLECTIBLES, w3
-from auth import owner_required
-from processors.contract import ContractProcessor
+from auth import manager_required
+from processors.lottery import LotteryProcessor
+from processors.nft import NftProcessor
 
 
 lottery = Blueprint("lottery", __name__)
@@ -23,7 +24,7 @@ def lottery_home():
 
 @lottery.route("/lottery/mint", methods=["POST"])
 @login_required
-@owner_required
+@manager_required
 def mint():
     """
     Mint a new token for the current user, and redirect to the home page.
@@ -35,12 +36,12 @@ def mint():
     if not collectible and not id:
         abort(400)
     collectible = COLLECTIBLES.get(int(id))
-    tx_result = ContractProcessor.mint(
+    tx_result = LotteryProcessor.mint(
         collectible.id, collectible.collectible, collectible.rank
     )
     if tx_result:
         flash("Collectible minted successfully")
-        COLLECTIBLES[int(id)].owner = ContractProcessor.owner_of(collectible.id)
+        COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
     else:
         flash("Error during minting")
     return redirect(url_for("home.index"))
