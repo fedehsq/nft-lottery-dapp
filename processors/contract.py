@@ -3,6 +3,8 @@ from flask_login import current_user
 
 class ContractProcessor:
 
+    ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
+
     @staticmethod
     def deploy_contract(contract_name, *constructor_args):
         from app import w3, owner
@@ -18,7 +20,7 @@ class ContractProcessor:
         construct_txn = contract.constructor(*constructor_args).buildTransaction({
             'from': owner.address,
             'nonce': w3.eth.getTransactionCount(owner.address),
-            'gas': 1728712,
+            'gas': 30000000,
             'gasPrice': w3.toWei('21', 'gwei')})
 
         # sign the deployment transaction with the private key
@@ -29,9 +31,7 @@ class ContractProcessor:
 
         # collect the Transaction Receipt with contract address when the transaction is mined on the network
         tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        print("Contract Deployed At:", tx_receipt['contractAddress'])
         contract_address = tx_receipt['contractAddress']
-        print(contract_address)
 
         # Initialize a contract instance object using the contract address which can be used to invoke contract functions
         contract_instance = w3.eth.contract(abi=abi, address=contract_address)
@@ -41,18 +41,28 @@ class ContractProcessor:
     Mint a collectible
     """
     @staticmethod
-    def mint(id: int, collectible: str):
+    def mint(id: int, collectible: str, rank: int):
         from app import w3, lottery_instance
         try:
             tx = ContractProcessor.create_transaction()
-            tx_hash = lottery_instance.functions.mint(int(id), collectible).transact(
+            tx_hash = lottery_instance.functions.mint(id, rank, collectible).transact(
                 tx
             )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt['status']
-        except Exception:
+        except Exception as e:
+            print(e)
             return 0
+
+
+    @staticmethod
+    def owner_of(id: int):
+        """
+        Get the owner of a id collectible
+        """
+        from app import nft_instance
+        return nft_instance.functions.ownerOf(id).call()
 
     """
     Transfer a token from one address to another
@@ -76,13 +86,14 @@ class ContractProcessor:
     """
     @staticmethod
     def create_transaction():
-        from app import w3, lottery_address
+        from app import w3, lottery_address, owner
         wei = w3.toWei(10, "ether")
         tx = {
-            "from": current_user.id,
+            "from": owner.address,
             "to": lottery_address,
-            "value": wei,
-            "gas": 2000000,
+            #"value": wei,
+            'input': "0xc6e64e5300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000013300000000000000000000000000000000000000000000000000000000000000",
+            "gas": 2618850,
             "gasPrice": w3.toWei("40", "gwei"),
         }
         return tx

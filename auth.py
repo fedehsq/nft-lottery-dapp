@@ -4,29 +4,22 @@ from app import w3, owner
 import enum
 from functools import wraps
 
-class Role(enum.Enum):
-    MANAGER = 'MANAGER'
-    USER = 'USER'
-
-    def __str__(self):
-        return str(self.value)
-
 """
 Lightweight class for representing a user.
 """
 class User(UserMixin):
     
-    def __init__(self, address: str, role: Role):
+    def __init__(self, address: str, is_admin: bool):
         self.id = address
-        self.role = role
+        self.is_admin = is_admin
     
     def __repr__(self):
-        return f"User({self.id}, {self.role})"
+        return f"User({self.id}, {self.is_admin})"
 
 def owner_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.role == Role.USER:
+        if not current_user.is_admin:
             flash("Only the owner can perform this operation")
             return redirect(url_for("home.index"))
         return f(*args, **kwargs)
@@ -47,9 +40,7 @@ def init_login_manager(app):
         accounts = w3.eth.accounts
         for account in accounts:
             if account == user_id:
-                print('loggo')
-                print(user_id)
-                return User(account, Role.USER if account != owner else Role.MANAGER)
+                return User(account, True if account == owner.address else False)
 
     return login_manager
     

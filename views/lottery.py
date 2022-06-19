@@ -7,8 +7,8 @@ from flask import (
     request,
     url_for,
 )
-from flask_login import login_required
-from app import w3
+from flask_login import current_user, login_required
+from app import COLLECTIBLES, w3
 from auth import owner_required
 from processors.contract import ContractProcessor
 
@@ -25,14 +25,22 @@ def lottery_home():
 @login_required
 @owner_required
 def mint():
+    """
+    Mint a new token for the current user, and redirect to the home page.
+    If the user is not the owner, flash a message and redirect to the home page.
+    If the user is the owner, mint a new token and redirect to the home page.
+    """
     collectible = request.form.get("collectible")
     id = request.form.get("collectibleId")
     if not collectible and not id:
         abort(400)
-    # Mint a collectible
-    tx_result = ContractProcessor.mint(int(id), collectible)
+    collectible = COLLECTIBLES.get(int(id))
+    tx_result = ContractProcessor.mint(
+        collectible.id, collectible.collectible, collectible.rank
+    )
     if tx_result:
-        flash("Collectible minted successfully", "success")
+        flash("Collectible minted successfully")
+        COLLECTIBLES[int(id)].owner = ContractProcessor.owner_of(collectible.id)
     else:
         flash("Error during minting")
     return redirect(url_for("home.index"))

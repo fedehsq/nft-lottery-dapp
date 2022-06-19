@@ -3,10 +3,8 @@ from flask import (
     render_template,
     Blueprint,
 )
-from flask import session
-from app import w3, nft_instance
+from app import w3, COLLECTIBLES
 from flask import jsonify
-from processors.nft_collectible import NftCollectible
 from app import (
     lottery_closed_event,
     lottery_created_event,
@@ -18,33 +16,16 @@ from app import (
 
 
 home = Blueprint("home", __name__)
-# get all colletibles from static folder
-images = [image for image in os.listdir("./static/images/collectibles")]
-
 
 @home.route("/", methods=["GET", "POST"])
 def index():
-    # get ten random from the static folder and display them into the slider
-    collectibles = [
-        NftCollectible(
-            id=int(collectible[:-4]),
-            collectible=collectible,
-            owner=nft_instance.functions.ownerOf(int(collectible[:-4])).call(),
-        )
-        for collectible in images[0:10]
-    ]
-    slideshow_collectibles = [
-        NftCollectible(
-            id=int(collectible[:-4]),
-            collectible=collectible,
-            owner=nft_instance.functions.ownerOf(int(collectible[:-4])).call(),
-        )
-        for collectible in images[10:20]
-    ]
+    from app import nft_address, lottery_address
+    print(nft_address)
+    print(lottery_address)
     return render_template(
         "index.html",
-        collectibles=collectibles,
-        slideshow_collectibles=slideshow_collectibles,
+        collectibles=[COLLECTIBLES.get(key) for key in range(1, 10)],
+        slideshow_collectibles=[COLLECTIBLES.get(key) for key in range(10, 20)],
     )
 
 

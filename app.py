@@ -1,9 +1,12 @@
+import os
+import random
 from time import sleep
 from flask_executor import Executor
 from web3 import Web3, HTTPProvider
 from flask import Flask
 from processors.contract import ContractProcessor
 from config import Development
+from processors.nft_collectible import NftCollectible
 
 
 # create a web3.py instance w3 by connecting to the local Ethereum node
@@ -11,13 +14,8 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 owner = w3.eth.account.from_key(
-    "0xda1f57d425880fa77cfb08983dc928012902f18c146b73fffeae1aa8a3ba3086"
+    "0x320d83b7542d14beb24f90659840594dd404c10f9c2c2ef02ac3e159942c2906"
 )
-
-print(owner.address)
-print(owner.address)
-print(owner.address)
-print(owner.address)
 
 # Nft contract address and ABI
 nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
@@ -26,6 +24,7 @@ nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
 lottery_address, lottery_instance = ContractProcessor.deploy_contract(
     "Lottery", nft_address, 2
 )
+
 
 # Filter for Lottery events
 lottery_created_event = lottery_instance.events.LotteryCreated.createFilter(
@@ -57,16 +56,26 @@ winning_numbers_drawn = lottery_instance.events.WinningNumbersDrawn.createFilter
     fromBlock=1, toBlock="latest"
 )
 
-
-executor = Executor()
-
-"""
-Create the flask app register the blueprints, 
-and initialize the executor.
-"""
-
+# Create all the collectibles as map of key:value pairs
+COLLECTIBLES = dict(
+    [
+        (
+            int(collectible[:-4]),
+            NftCollectible(
+                id=int(collectible[:-4]),
+                collectible=collectible,
+                rank=random.randint(1, 8),
+                owner=ContractProcessor.ADDRESS_ZERO,
+            ),
+        )
+        for collectible in os.listdir("./static/images/collectibles")
+    ]
+)
 
 def create_app(config="config.Development"):
+    """
+    Create the flask app register the blueprints
+    """
     from views.home import home
     from views.auth import auth
     from views.lottery import lottery
@@ -78,7 +87,6 @@ def create_app(config="config.Development"):
     app.register_blueprint(auth)
     app.register_blueprint(lottery)
     lm.init_login_manager(app)
-    executor.init_app(app)
 
     """@app.before_first_request
     def before_first_request():
@@ -87,25 +95,7 @@ def create_app(config="config.Development"):
     return app
 
 
-"""
-Thread that listens for events on the blockchain.
-"""
-
-
-@executor.job
-def listen_for_events():
-    from app import event_filter
-    from flask import session
-
-    i = 0
-    # while True:
-    #    i += 1
-    #    session["event_count"] = i
-    #    #print(event_filter.get_new_entries())
-    #    #print(event_filter.get_all_entries())
-    #    sleep(10)
-
-
 if __name__ == "__main__":
+    print("qua")
     app = create_app(config=Development)
     app.run(debug=True)

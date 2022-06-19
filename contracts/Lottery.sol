@@ -135,16 +135,15 @@ contract Lottery {
     /// @param nToken the number of nft to mint
     function mintNtoken(uint256 nToken) public {
         for (uint256 i = 0; i < nToken; i++) {
-            mint();
+            autoMint();
         }
     }
 
     /// @notice The lottery operator can mint new token.
     /// The name of the image is the tokenId.
-    /// @dev Throws unless `msg.sender` is the current owner or the class (rank) is not valid
+    /// @dev Throws unless `msg.sender` is the current owner
     /// @dev Throws unless the lottery is active
-    /// @dev Throws unless the number of collectibles is less than 8 or the number of tickets
-    function mint() public {
+    function autoMint() public {
         require(
             msg.sender == manager,
             "Only the operator con do this operation"
@@ -161,6 +160,34 @@ contract Lottery {
         );
         collectibles[class].push(Collectible(tokenId, image));
         nft.mint(tokenId, image);
+        emit TokenMinted(msg.sender, tokenId, image);
+    }
+
+    /// @notice The lottery operator can mint new token.
+    /// The name of the image is the tokenId.
+    /// @param _class the class of the collectible
+    /// @param _tokenId the id of the collectible
+    /// @param _collectible the name of the _collectible
+    /// @dev Throws unless `msg.sender` is the current owner
+    /// @dev Throws unless the lottery is active
+    function mint(uint256 _tokenId, uint256 _class, string memory _collectible) public {
+        require(
+            msg.sender == manager,
+            "Only the operator con do this operation"
+        );
+        require(lotteryActive, "Lottery is not active");
+        require(_class <= 8, "Class must be between 1 and 8");
+        nft.mint(_tokenId, _collectible);
+        tokenId = _tokenId;
+        uint256 class = _class;
+        string memory image = string(
+            abi.encodePacked(
+                COLLECTIBLES_REPO,
+                Strings.toString(tokenId),
+                ".svg"
+            )
+        );
+        collectibles[class].push(Collectible(tokenId, image));
         emit TokenMinted(msg.sender, tokenId, image);
     }
 
@@ -335,7 +362,7 @@ contract Lottery {
                 uint256 id = 0;
                 // if the class is empty, mint a new collectible for the winner
                 if (collectibles[classPrize].length == 0) {
-                    mint();
+                    autoMint();
                     id = tokenId;
                     nft.transferFrom(address(this), tickets[i].owner, id);
                 } else {
@@ -351,7 +378,7 @@ contract Lottery {
                         nft.transferFrom(address(this), tickets[i].owner, id);
                     } else {
                         // mint a new collectible for the winner
-                        mint();
+                        autoMint();
                         id = tokenId;
                         nft.transferFrom(address(this), tickets[i].owner, id);
                     }
