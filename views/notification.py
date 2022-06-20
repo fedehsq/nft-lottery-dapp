@@ -32,12 +32,17 @@ def notifications():
         + prize_assigned.get_all_entries()
     )
 
-    #for e in events_entries:
-        
-        
-    if len(events_entries) > 0:
-        events = [event.get("event") for event in events_entries]
-        session["events"] = session.get("events", []) + events
+    events = []
+    for event in events_entries:
+        block_id = str(event.blockNumber)
+        # Check if the event is already notified
+        if not session.get(block_id):
+            session[block_id] = block_id
+            events.append(event.get('event'))
+            
+    session["events"] = session.get("events", []) + events
+
+    if len(events) > 0:
         return jsonify(
             status=200, events=events, non_read_events=session.get("events", [])
         )
