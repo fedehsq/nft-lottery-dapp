@@ -12,7 +12,7 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 manager = w3.eth.account.from_key(
-    "0x888cb9673068bde93d8ff318fab23fbde849cbd1af94a260ce0f68a37124f433"
+    "0x150ffec9613f6eb2312d53930da9c96feb9ec4ee2e133130053ce75c4c1cb3a6"
 )
 
 # Nft contract address and ABI
@@ -77,6 +77,7 @@ def create_app(config="config.Development"):
     from views.home import home
     from views.auth import auth
     from views.lottery import lottery
+    from views.notification import notification
     import auth as lm
 
     app = Flask(__name__)
@@ -84,6 +85,7 @@ def create_app(config="config.Development"):
     app.register_blueprint(home)
     app.register_blueprint(auth)
     app.register_blueprint(lottery)
+    app.register_blueprint(notification)
     lm.init_login_manager(app)
 
     """@app.before_first_request

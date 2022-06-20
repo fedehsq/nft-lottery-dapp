@@ -1,0 +1,44 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="container" style="margin-top: 64px;">
+  <!-- create a card with form to fill for execute transferFrom operation with params "from", "to", "tokenId" -->
+  <div class="card" style="margin: auto;">
+    <div class="card-header">
+      <h5>Lottery</h5>
+    </div>
+    <div class="card-body">
+      <!-- create button to open the lottery -->
+      <a href="lottery/create-lottery">
+        <button type="button" class="btn btn-primary">
+          Open lottery
+        </button>
+      </a>
+      <hr>
+      <!-- create button to open a round of the lottery -->
+      <a href="lottery/open-round">
+        <button type="button" class="btn btn-primary">
+          Open round
+        </button>
+      </a>
+      <hr>
+      <!-- create button to close the lottery -->
+      <a href="lottery/close-lottery">
+        <button type="button" class="btn btn-primary">
+          Close lottery
+        </button>
+      </a>
+      <hr>
+      <!-- create button to extract the winning ticket -->
+      <a href="lottery/extract-winning-ticket">
+        <button type="button" class="btn btn-primary">
+          Extract winning ticket
+        </button>
+      </a>
+      <hr>
+      <!-- create button todraw the prizes -->
+      <a href="lottery/draw-prizes">
+        <button type="button" class="btn btn-primary">
+          Draw prizes
+        </button>
+    </div>

@@ -25,3 +25,12 @@ hr {
     border: 0;
     border-top: 1px solid rgba(0, 0, 0, .1)
 }
+
+
+.carousel-indicators li {
+    background-color: #6C63FF;
+}
+
+.carousel-indicators .active {
+    background-color: black;
+}

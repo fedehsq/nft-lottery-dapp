@@ -28,66 +28,87 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@glidejs/glide/dist/css/glide.core.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm//@glidejs/glide/dist/css/glide.theme.min.css">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <style>
         .carousel-indicators li {
-            background-color: #6C63FF;
+            background-color: grey;
         }
 
         .carousel-indicators .active {
             background-color: black;
         }
+
+        .carousel-control-next-icon, .carousel-control-prev-icon {
+            background-color: black;
+            border-radius: 16px;
+
+        }
     </style>
 
     <script>
+        // Hide the notification banner after 3 seconds
         setTimeout(function () {
             $('#flash').fadeOut('fast');
         }, 3000);
     </script>
 
-    
+
     <script>
         // reload notification every 10 seconds
-        $(document).ready(function () {
-            setInterval(function () {
-                $.ajax({
-                    url: '/notifications',
-                    success: function (response) {
-                        if (response['status'] == 200) {
-                            // Get the notifications of contract events
-                            var events = response['events'];
-                            var non_read_events = response['non_read_events'];
-                            // Create the notification
-                            $('#notifications-count').text(non_read_events.length)
-                            for (var i = 0; i < events.length; i++) {
-                                var event = events[i];
-                                var event_html = '<div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 8px">' +
-                                    '<strong>' + event + '</strong>' +
-                                    '</div>';
-                                $('#notifications').append(event_html);
-                                $('#notifications-body').append(event)
-                            }
-                            // Remove the notifications of contract events after 10 seconds
-                            setTimeout(function () {
-                                $('#notifications').empty();
-                            }, 10000);
+        setInterval(function () {
+            $.ajax({
+                url: '/notifications',
+                success: function (response) {
+                    console.log(response)
+                    if (response['status'] == 200) {
+                        // Get the notifications of contract events
+                        var events = response['events'];
+                        var nonReadEvents = response['non_read_events'];
+                        // Create the notifications
+                        //$('#notifications-body').empty();
+                        $('#delete-notifications-btn').css('display', 'none');
+                        $('#notifications-count').css('display', 'block');
+                        $('#notifications-count').text(nonReadEvents.length)
+                        // Append old non read notifications
+                        //for (var i = 0; i < nonReadEvents.length; i++) {
+                        //    var event = nonReadEvents[i];
+                        //    $('#notifications-body').append(event);
+                        //    $('#notifications-body').append('<hr>');
+                        //}
+                        // Append new notifications
+                        for (var i = 0; i < events.length; i++) {
+                            var event = events[i];
+                            var htmlEvent = '<div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 8px">' +
+                                '<strong>' + event + '</strong>' +
+                                '</div>';
+                            $('#notifications').append(htmlEvent);
+                            $('#notifications-body').append(event)
+                            $('#notifications-body').append('<hr>');
                         }
-                    },
-                });
+                        var deleteButton = '<button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none;" type="button" class="btn btn-primary">Delete</button>';
+                        $('#notifications-body').append(deleteButton);
+                        // Remove the notification banner after 10 seconds
+                        setTimeout(function () {
+                            $('#notifications').fadeOut('fast');
+                        }, 5000);
+                    }
+                },
+            });
 
-            }, 10000);
-        });
+        }, 10000);
     </script>
 
     <script>
+        // call the function to delete the notifications from session variable
         $(document).on('click', "#delete-notifications-btn", function (e) {
             e.preventDefault();
             $.ajax({
                 type: "GET",
                 url: "/notifications/delete-all",
-                success: function(result) {
-                    $("#notifications-count").empty();
+                success: function (result) {
+                    $("#notifications-count").css('display', 'none');
                     $("#notifications-body").empty();
                 },
             });

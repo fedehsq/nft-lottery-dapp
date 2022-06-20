@@ -8,7 +8,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
-from app import COLLECTIBLES, w3
+from app import COLLECTIBLES, lottery_instance
 from auth import manager_required
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
@@ -47,23 +47,50 @@ def mint():
     return redirect(url_for("home.index"))
 
 
-"""@lottery.route("/lottery/transfer-from", methods=["POST"])
+@lottery.route("/lottery/create-lottery", methods=["GET"])
 @login_required
-def transfer_from():
-    _from = request.form.get("from")
-    to = request.form.get("to")
-    token_id = request.form.get("tokenId")
-    if not _from or not to or not token_id:
-        abort(400)
-
-    if not w3.isAddress(_from) or not w3.isAddress(to):
-        flash("Invalid address", "danger")
-        return redirect(url_for(".lottery"))
-
-    # Transfer a collectible
-    tx_result = ContractProcessor.transfer_from(_from, to, int(token_id))
+@manager_required
+def create_lottery():
+    """
+    Create the lottery and redirect to the lottery page.
+    """
+    tx_result = LotteryProcessor.create_lottery()
     if tx_result:
-        flash("Token transfered successfully", "success")
+        flash("Lottery created successfully")
     else:
-        flash("Error during transfer from")
-    return redirect(url_for(".lottery"))"""
+        flash("Error during creation")
+    return redirect(url_for(".lottery_home"))
+
+@lottery.route("/lottery/open-round", methods=["GET"])
+@login_required
+@manager_required
+def open_round():
+    tx_result = LotteryProcessor.open_round()
+    if tx_result:
+        flash("Round opened successfully")
+    else:
+        flash("Error during opening")
+    return redirect(url_for(".lottery_home"))
+
+@lottery.route("/lottery/close-lottery", methods=["GET"])
+@login_required
+@manager_required
+def open_round():
+    tx_result = LotteryProcessor.close_lottery()
+    if tx_result:
+        flash("Lottery closed successfully")
+    else:
+        flash("Error during closing")
+    return redirect(url_for(".lottery_home"))
+
+@lottery.route("/lottery/extract-winning-ticket", methods=["GET"])
+@login_required
+@manager_required
+def open_round():
+    tx_result = LotteryProcessor.close_lottery()
+    if tx_result:
+        flash("Lottery closed successfully")
+    else:
+        flash("Error during closing")
+    return redirect(url_for(".lottery_home"))
+

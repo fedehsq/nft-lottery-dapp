@@ -14,8 +14,8 @@
                 </a>
             </li>
             <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
-                <a class="nav-link" href="/nft-operations" role="button">
-                    Nft Operations
+                <a class="nav-link" href="lottery" role="button">
+                    Lottery
                 </a>
             </li>
 
@@ -25,22 +25,24 @@
                     <span class="material-symbols-outlined">
                         notifications
                     </span>
-                    <div class="badge" id="notifications-count" style="position: absolute; top: -8px; left: 28px;">
+                    <div class="badge" id="notifications-count"
+                        style="position: absolute; top: -8px; left: 28px; display: {% if session['events']|length == 0 %} none; {% else %} block; {% endif %}">
                         {% if session['events']|length > 0 %}
                         {{ session['events']|length }}
                         {% endif %}
                     </div>
                 </div>
                 <div class="dropdown-menu" id="notifications-body" aria-labelledby="navbarDropdown"
-                    style="padding: 2px; text-align: center;">
-
+                    style="text-align: center;">
+                    
                     {% for notification in session['events'] %}
                     {{ notification }}
                     <hr class="divider">
                     {% endfor %}
                     {% if session['events']|length > 0 %}
-                            <button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none;" type="button"
-                                class="btn btn-primary">Delete</button>
+                    <button id="delete-notifications-btn"
+                        style="border-radius: 32px; background-color: red; border: none;" type="button"
+                        class="btn btn-primary">Delete</button>
                     {% endif %}
                 </div>
             </li>
