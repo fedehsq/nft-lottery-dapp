@@ -28,6 +28,18 @@ def manager_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def user_required(f):
+    """
+    Decorator for views that require the user to be a normal user.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_admin:
+            flash("Only normal users can can perform this operation")
+            return redirect(url_for("home.index"))
+        return f(*args, **kwargs)
+    return decorated_function
+
 def init_login_manager(app):
     """
     Initialize the login manager.

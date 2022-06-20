@@ -9,7 +9,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from app import COLLECTIBLES, lottery_instance
-from auth import manager_required
+from auth import manager_required, user_required
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
 
@@ -18,6 +18,7 @@ lottery = Blueprint("lottery", __name__)
 
 
 @lottery.route("/lottery", methods=["GET"])
+@login_required
 def lottery_home():
     return render_template("lottery.html")
 
@@ -47,6 +48,29 @@ def mint():
     return redirect(url_for("home.index"))
 
 
+@lottery.route("/lottery/buy-ticket", methods=["POST"])
+@login_required
+@user_required
+def buy_ticket():
+    """
+    Buy a ticket for the current user.
+    """
+    one = int(request.form.get("one"))
+    two = int(request.form.get("two"))
+    three = int(request.form.get("three"))
+    four = int(request.form.get("four"))
+    five = int(request.form.get("five"))
+    powerball = int(request.form.get("powerball"))
+    if not one or not two or not three or not four or not five or not powerball:
+        abort(400)
+    tx_result = LotteryProcessor.buy_ticket(one, two, three, four, five, powerball)
+    if tx_result:
+        flash("Tickets bought successfully")
+    else:
+        flash("Error during buying")
+    return redirect(url_for(".lottery_home"))
+
+
 @lottery.route("/lottery/create-lottery", methods=["GET"])
 @login_required
 @manager_required
@@ -61,6 +85,7 @@ def create_lottery():
         flash("Error during creation")
     return redirect(url_for(".lottery_home"))
 
+
 @lottery.route("/lottery/open-round", methods=["GET"])
 @login_required
 @manager_required
@@ -72,25 +97,38 @@ def open_round():
         flash("Error during opening")
     return redirect(url_for(".lottery_home"))
 
+
 @lottery.route("/lottery/close-lottery", methods=["GET"])
 @login_required
 @manager_required
-def open_round():
+def close_lottery():
     tx_result = LotteryProcessor.close_lottery()
     if tx_result:
         flash("Lottery closed successfully")
     else:
         flash("Error during closing")
     return redirect(url_for(".lottery_home"))
+
 
 @lottery.route("/lottery/extract-winning-ticket", methods=["GET"])
 @login_required
 @manager_required
-def open_round():
-    tx_result = LotteryProcessor.close_lottery()
+def extract_winning_ticket():
+    tx_result = LotteryProcessor.extract_winning_ticket()
     if tx_result:
-        flash("Lottery closed successfully")
+        flash("Winning ticket extracted successfully")
     else:
-        flash("Error during closing")
+        flash("Error during extraction")
     return redirect(url_for(".lottery_home"))
 
+
+@lottery.route("/lottery/give-prizes", methods=["GET"])
+@login_required
+@manager_required
+def give_prizes():
+    tx_result = LotteryProcessor.give_prizes()
+    if tx_result:
+        flash("Prizes given successfully")
+    else:
+        flash("Error during giving prizes")
+    return redirect(url_for(".lottery_home"))

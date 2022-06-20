@@ -12,7 +12,7 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 manager = w3.eth.account.from_key(
-    "0x150ffec9613f6eb2312d53930da9c96feb9ec4ee2e133130053ce75c4c1cb3a6"
+    "0xabe400a130daa8d3cb17a7d3a01316272d090a393c8c5a56df097fba311e1b4b"
 )
 
 # Nft contract address and ABI
@@ -51,6 +51,11 @@ ticket_bought_event = lottery_instance.events.TicketBought.createFilter(
 
 # Filter for Lottery events
 winning_numbers_drawn = lottery_instance.events.WinningNumbersDrawn.createFilter(
+    fromBlock=1, toBlock="latest"
+)
+
+# Filter for Lottery events
+prize_assigned = lottery_instance.events.PrizeAssigned.createFilter(
     fromBlock=1, toBlock="latest"
 )
 
