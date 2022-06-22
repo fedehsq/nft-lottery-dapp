@@ -1,8 +1,43 @@
+from flask import flash
 from flask_login import current_user
 from processors.contract import ContractProcessor
 
 
 class LotteryProcessor:
+
+    @staticmethod
+    def is_open():
+        """
+        :return: True if the lottery is open, False otherwise
+        """
+        from app import lottery_instance
+        return lottery_instance.functions.isLotteryActive().call()
+    
+    @staticmethod
+    def is_already_minted(id: int):
+        """
+        :param id: id of the collectible
+        :return: True if the collectible is already minted, False otherwise
+        """
+        from app import nft_instance
+        return nft_instance.functions.ownerOf(id).call() == ContractProcessor.ADDRESS_ZERO
+    
+    @staticmethod
+    def is_round_active():
+        """
+        :return: True if the round is active, False otherwise
+        """
+        from app import lottery_instance
+        return lottery_instance.functions.isRoundActive().call()
+    
+    @staticmethod
+    def is_round_finished():
+        """
+        :return: True if the round is finished, False otherwise
+        """
+        from app import lottery_instance
+        return lottery_instance.functions.isRoundFinished().call()
+
     @staticmethod
     def mint(id: int, collectible: str, rank: int):
         """
@@ -12,8 +47,8 @@ class LotteryProcessor:
         :param rank: rank of the collectible
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
+        from app import w3, lottery_instance, lottery_address, manager, nft_instance
+       
         try:
             tx = ContractProcessor.create_transaction(
                 manager.address, lottery_address, 0
@@ -23,7 +58,7 @@ class LotteryProcessor:
             )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
-            return tx_receipt["status"]
+            return tx_receipt["status"], "Collectible minted successfully"
         except Exception as e:
             print(e)
             return 0
@@ -43,6 +78,7 @@ class LotteryProcessor:
         :return: Transaction result
         """
         from app import w3, lottery_instance, lottery_address, manager
+        # 
 
         try:
             tx = ContractProcessor.create_transaction(

@@ -293,6 +293,34 @@ contract Lottery {
         return endRoundBlock > block.number;
     }
 
+    
+    /// @notice Check if the lottery is active.
+    /// @return True if the lottery is active, false otherwise.
+    function isLotteryActive() public view returns (bool) {
+        return lotteryActive;
+    }
+
+    /// @notice Check if the token is alredy minted.
+    /// @param _tokenId The id of the token
+    /// @return True if the token is minted, false otherwise.
+    function isAlreadyMinted(uint256 _tokenId) public view returns (bool) {
+        return nft.ownerOf(_tokenId) != address(0);
+    }
+
+
+    /// @notice Check if the round is finished.
+    /// @return True if the round is finished, false otherwise.
+    function isRoundFinished() public view returns (bool) {
+        return roundFinished;
+    }
+
+    /// @notice Check if the round is finished.
+    /// @return True if the round is finished, false otherwise.
+    function areNumbersDrawn() public view returns (bool) {
+        return numbersExtracted;
+    }
+
+
     /// @notice Generate a random int.
     /// @return A random int.
     function generateRandomNumber(uint256 seed) private view returns (uint256) {
