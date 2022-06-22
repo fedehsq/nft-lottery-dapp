@@ -1,4 +1,3 @@
-from flask import flash
 from flask_login import current_user
 from processors.contract import ContractProcessor
 
@@ -20,7 +19,7 @@ class LotteryProcessor:
         :return: True if the collectible is already minted, False otherwise
         """
         from app import nft_instance
-        return nft_instance.functions.ownerOf(id).call() == ContractProcessor.ADDRESS_ZERO
+        return nft_instance.functions.ownerOf(id).call() != ContractProcessor.ADDRESS_ZERO
     
     @staticmethod
     def is_round_active():
@@ -37,6 +36,14 @@ class LotteryProcessor:
         """
         from app import lottery_instance
         return lottery_instance.functions.isRoundFinished().call()
+
+    @staticmethod
+    def is_winning_ticket_extracted():
+        """
+        :return: True if the winning ticket is already extracted, False otherwise
+        """
+        from app import lottery_instance
+        return lottery_instance.functions.areNumbersDrawn().call()
 
     @staticmethod
     def mint(id: int, collectible: str, rank: int):

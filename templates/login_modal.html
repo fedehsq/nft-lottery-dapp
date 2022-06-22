@@ -9,7 +9,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="/login">
+            <form method="post" action="{{ url_for('auth.login') }}">
                 <div class="modal-body">
                     <div class="form-group row" style="width: max-content">
                         <label for="address" class="col-sm-3 col-form-label">Address</label>

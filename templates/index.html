@@ -25,18 +25,18 @@
                     collectible.owner }}</span> <br>
 
 
-            {% if current_user.is_authenticated %}
+                {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}
-                    <form method="post" action="lottery/mint" style=" text-align: center;">
-                        <input id="collectibleId" name="collectibleId" type="hidden" value="{{ collectible.id }}">
-                        <input id="collectible" name="collectible" type="hidden" value="{{ collectible.collectible }}">
-                        <button style="border-radius: 32px; background-color: #6C63FF; border: none;" type="submit"
-                            class="btn btn-primary">Mint</button>
-                    </form>
-                {% endif %}
+            <form method="post" action="lottery/mint" style=" text-align: center;">
+                <input id="collectibleId" name="collectibleId" type="hidden" value="{{ collectible.id }}">
+                <input id="collectible" name="collectible" type="hidden" value="{{ collectible.collectible }}">
+                <button style="border-radius: 32px; background-color: #6C63FF; border: none;" type="submit"
+                    class="btn btn-primary">Mint</button>
+            </form>
+            {% endif %}
             {% else %}
-            <button style="border-radius: 32px; background-color: #6C63FF; border: none;  text-align: center;" type="submit"
-                class="btn btn-primary" data-toggle="modal" data-target="#loginModal">Mint</button>
+            <button style="border-radius: 32px; background-color: #6C63FF; border: none;  text-align: center;"
+                type="submit" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">Mint</button>
             {% endif %}
 
 
@@ -93,6 +93,14 @@
         gap: 50,
         bound: true,
         autoplay: 5000,
+        breakpoints: {
+            600: {
+                perView: 1
+            },
+            1000: {
+                perView: 2
+            },
+        }
     }).mount()
 </script>
 

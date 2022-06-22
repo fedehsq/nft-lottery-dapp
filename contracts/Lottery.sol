@@ -136,6 +136,9 @@ contract Lottery {
             }
         }
         lotteryActive = false;
+        roundFinished = true;
+        numbersExtracted = true;
+        endRoundBlock = 0;
         emit LotteryClosed();
     }
 
@@ -168,7 +171,7 @@ contract Lottery {
         );
         collectibles[class].push(Collectible(tokenId, image));
         nft.mint(tokenId, image);
-        emit TokenMinted(msg.sender, tokenId, image);
+        emit TokenMinted(address(this), tokenId, image);
     }
 
     /// @notice The lottery operator can mint new token.
@@ -196,7 +199,7 @@ contract Lottery {
             )
         );
         collectibles[class].push(Collectible(tokenId, image));
-        emit TokenMinted(msg.sender, tokenId, image);
+        emit TokenMinted(address(this), tokenId, image);
     }
 
     /// @notice Buy 'random' tickets.
@@ -314,12 +317,11 @@ contract Lottery {
         return roundFinished;
     }
 
-    /// @notice Check if the round is finished.
-    /// @return True if the round is finished, false otherwise.
+    /// @notice Check if the winning numbers are extracted.
+    /// @return True if the winning numbers are extracted, false otherwise.
     function areNumbersDrawn() public view returns (bool) {
         return numbersExtracted;
     }
-
 
     /// @notice Generate a random int.
     /// @return A random int.

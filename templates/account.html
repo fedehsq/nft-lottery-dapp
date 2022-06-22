@@ -1,0 +1,62 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="container" style="margin-top: 64px;">
+  <h1>Profile</h1>
+  <img style="width: 50%" src="{{ url_for('static', filename='images/profile.svg') }}">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">Account</h5>
+    </div>
+    <div class="card-body">
+      <p class="card-text">Address: <b>{{ current_user.id }}</b></p>
+      <p class="card-text">Role: <b>{% if current_user.is_admin %} Manager {% else %} User {% endif %}</b></p>
+      <p class="card-text">Balance: <b>{{balance}}</b></p>
+      <p class="card-text">NFT balance: <b>{{collectibles|length}}</b></p>
+      <!-- slider with collectibles -->
+      <div class="glide" style="padding-bottom: 64px;">
+        <div class="glide__track" data-glide-el="track">
+          <ul class="glide__slides">
+            {% for collectible in collectibles %}
+            <li class="glide__slide">
+              {% include 'collectible_card.html' %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div style="background-color: #E8E8E8; border-radius: 10px; padding: 4px;"
+          class="slider__bullets glide__bullets" data-glide-el="controls[nav]">
+          {% for collectible in collectibles %}
+          {% if (loop.index) <= collectibles|length-2 %} <button class="slider__bullet glide__bullet"
+            data-glide-dir="={{ loop.index - 1 }}"></button>
+            {% endif %}
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Logout</a>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  new Glide('.glide', {
+    type: 'slider',
+    startAt: 0,
+    perView: 3,
+    gap: 50,
+    bound: true,
+    autoplay: 5000,
+    breakpoints: {
+      600: {
+        perView: 1
+      },
+      1000: {
+        perView: 2
+      },
+    }
+  }).mount()
+</script>

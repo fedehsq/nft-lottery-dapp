@@ -7,8 +7,7 @@
         </a>
 
         <!-- large screen size -->
-        <ul class="navbar-nav ml-auto" style="align-items: center;">
-
+        <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
                 <div class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
@@ -22,35 +21,46 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="dropdown-menu" id="notifications-body" aria-labelledby="navbarDropdown"
-                    style="text-align: center;">
+                <div class="dropdown-menu" id="notifications-body" aria-labelledby="navbarDropdown">
                     
                     {% for notification in session['events'] %}
-                    {{ notification }}
+                    <div style="font-size: 12px; padding: 4px">{{ notification }}</div>
                     <hr class="divider">
                     {% endfor %}
                     {% if session['events']|length > 0 %}
                     <button id="delete-notifications-btn"
-                        style="border-radius: 32px; background-color: red; border: none;" type="button"
+                        style="border-radius: 32px; background-color: red; border: none; font-size: 12px;" type="button"
                         class="btn btn-primary">Delete</button>
                     {% endif %}
                 </div>
             </li>
 
             <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
-                <a class="nav-link" href="/accounts" role="button">
+                <a class="nav-link" href="{{ url_for('home.accounts') }}" role="button">
                     Accounts
                 </a>
             </li>
             <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
-                <a class="nav-link" href="lottery" role="button">
+                <a class="nav-link" href="{{ url_for('lottery.lottery_home') }}" role="button">
                     Lottery
                 </a>
             </li>
 
             <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
-                <a class="nav-link" href="lottery/tickets" role="button">
+                <a class="nav-link" href="{{ url_for('lottery.tickets') }}" role="button">
                     Tickets
+                </a>
+            </li>
+
+            <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
+                <a class="nav-link" href="{{ url_for('home.collectibles', page='1') }}" role="button">
+                    Collectibles
+                </a>
+            </li>
+
+            <li class="nav-item dropdown" style="margin-left: 18px; margin-right:32px">
+                <a class="nav-link" href="{{ url_for('auth.account') }}" role="button">
+                    Profile
                 </a>
             </li>
 

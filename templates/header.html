@@ -40,7 +40,8 @@
             background-color: black;
         }
 
-        .carousel-control-next-icon, .carousel-control-prev-icon {
+        .carousel-control-next-icon,
+        .carousel-control-prev-icon {
             background-color: black;
             border-radius: 16px;
 
@@ -79,18 +80,22 @@
                         $('#delete-notifications-btn').remove();
                         $('#notifications-count').css('display', 'block');
                         $('#notifications-count').text(nonReadEvents.length)
-     
+
                         // Append new notifications
                         for (var i = 0; i < events.length; i++) {
                             var event = events[i];
-                            var htmlEvent = '<div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 8px">' +
+                            var htmlEvent = '<div class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 16px">' +
                                 '<strong>' + event + '</strong>' +
+                                '<button type="button" class="btn close" data-dismiss="alert" aria-label="Close">' +
+                                '<span aria-hidden="true">x</span>' +
+                                '</button>' +
                                 '</div>';
                             $('#notifications').append(htmlEvent);
-                            $('#notifications-body').append(event)
+                            var smallEvent = '<div style="font-size: 12px; padding: 2px">' + event + '</div>';
+                            $('#notifications-body').append(smallEvent);
                             $('#notifications-body').append('<hr>');
                         }
-                        var deleteButton = '<button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none;" type="button" class="btn btn-primary">Delete</button>';
+                        var deleteButton = '<button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none; font-size: 12px;" type="button" class="btn btn-primary">Delete</button>';
                         $('#notifications-body').append(deleteButton);
                     }
                 },
