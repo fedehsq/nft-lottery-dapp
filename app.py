@@ -12,7 +12,7 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 manager = w3.eth.account.from_key(
-    "0x66dcd9687ae40be21d392b95a25cef6017a11f3ffed9e885b7cda9c01a22e470"
+    "0x3ae8308f7f573a8057468b3ecd8bb29734e386d8ab2d2aaa7e1be5c0b8d825e5"
 )
 
 # Nft contract address and ABI
@@ -79,6 +79,8 @@ COLLECTIBLES = dict(
         for collectible in os.listdir("./static/images/collectibles")
     ]
 )
+
+TICKETS = []
 
 def create_app(config="config.Development"):
     """

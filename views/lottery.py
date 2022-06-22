@@ -8,8 +8,9 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
-from app import COLLECTIBLES, lottery_instance
+from app import COLLECTIBLES, TICKETS, lottery_instance
 from auth import manager_required, user_required
+from helpers.ticket import Ticket
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
 
@@ -47,6 +48,18 @@ def mint():
         flash("Error during minting")
     return redirect(url_for("home.index"))
 
+@lottery.route("/lottery/tickets", methods=["GET"])
+@login_required
+def tickets():
+    """
+    Display the tickets.
+    If the user the manager, display all the tickets.
+    If the user is the user, display only the tickets that he owns.
+    """
+    if current_user.is_admin:
+        return render_template("tickets.html", tickets=TICKETS)
+    else:
+        return render_template("tickets.html", tickets=[ticket for ticket in TICKETS if ticket.buyer == current_user.id])
 
 @lottery.route("/lottery/buy-ticket", methods=["POST"])
 @login_required
@@ -66,6 +79,17 @@ def buy_ticket():
     tx_result = LotteryProcessor.buy_ticket(one, two, three, four, five, powerball)
     if tx_result:
         flash("Tickets bought successfully")
+        TICKETS.append(
+            Ticket(
+                buyer=current_user.id,
+                one=one,
+                two=two,
+                three=three,
+                four=four,
+                five=five,
+                powerball=powerball,
+            )
+        )
     else:
         flash("Error during buying")
     return redirect(url_for(".lottery_home"))

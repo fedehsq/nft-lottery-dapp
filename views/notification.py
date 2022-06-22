@@ -55,7 +55,11 @@ def notifications():
                 token_id = int(args._tokenId)
                 COLLECTIBLES[token_id].owner = NftProcessor.owner_of(token_id)
             session[block_id].append(event)
-            events.append(event + ": " + str(args))
+            # get all arguments of the event
+            str_args = ""
+            for k, v in args.items():
+                str_args += f"{k}: {v}; "
+            events.append(event + "(" + str_args + ")")
 
     session["events"] = session.get("events", []) + events
 

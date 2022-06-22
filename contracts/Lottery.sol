@@ -55,7 +55,7 @@ contract Lottery {
     event RoundFinished();
 
     string public constant COLLECTIBLES_REPO =
-        "https://github.com/fedehsq/nft_lottery/master/blob/collectibles/";
+        "https://github.com/fedehsq/nft_lottery/blob/master/collectibles/";
 
     address public manager;
     uint256 public roundDuration;

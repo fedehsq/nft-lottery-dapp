@@ -1,0 +1,13 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="container" style="margin-top: 64px;">
+    <h1>Tickets</h1>
+      <img class=" mx-auto d-block" style="width: 500px; height: 400px; margin-bottom: 24px;"
+          src="{{ url_for('static', filename='images/ticket.svg') }}">
+    <ul class="list-group">
+        {% for ticket in tickets %}
+        <li class="list-group-item">Ticket: {{ ticket.buyer, ticket.one, ticket.two, ticket.three, ticket.four, ticket.five, ticket.powerball  }}</li>
+      </ul>
+    {% endfor %}
+</div> 
