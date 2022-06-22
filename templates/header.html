@@ -48,10 +48,19 @@
     </style>
 
     <script>
-        // Hide the notification banner after 3 seconds
+        // Hide the flask flash messages banner after 3 seconds
         setTimeout(function () {
             $('#flash').fadeOut('fast');
         }, 3000);
+    </script>
+
+    <script>
+        /*
+        // Remove the notification banner after 10 seconds
+        setTimeout(function () {
+            $('#notifications').fadeOut('fast');
+        }, 15000);
+        */
     </script>
 
 
@@ -67,16 +76,10 @@
                         var events = response['events'];
                         var nonReadEvents = response['non_read_events'];
                         // Create the notifications
-                        //$('#notifications-body').empty();
-                        $('#delete-notifications-btn').css('display', 'none');
+                        $('#delete-notifications-btn').remove();
                         $('#notifications-count').css('display', 'block');
                         $('#notifications-count').text(nonReadEvents.length)
-                        // Append old non read notifications
-                        //for (var i = 0; i < nonReadEvents.length; i++) {
-                        //    var event = nonReadEvents[i];
-                        //    $('#notifications-body').append(event);
-                        //    $('#notifications-body').append('<hr>');
-                        //}
+     
                         // Append new notifications
                         for (var i = 0; i < events.length; i++) {
                             var event = events[i];
@@ -89,10 +92,6 @@
                         }
                         var deleteButton = '<button id="delete-notifications-btn" style="border-radius: 32px; background-color: red; border: none;" type="button" class="btn btn-primary">Delete</button>';
                         $('#notifications-body').append(deleteButton);
-                        // Remove the notification banner after 10 seconds
-                        setTimeout(function () {
-                            $('#notifications').fadeOut('fast');
-                        }, 5000);
                     }
                 },
             });

@@ -11,7 +11,10 @@ from app import (
     winning_numbers_drawn,
     token_minted_event,
     prize_assigned,
+    round_finished
 )
+from processors.nft import NftProcessor
+from app import COLLECTIBLES
 
 notification = Blueprint("notification", __name__)
 
@@ -30,16 +33,30 @@ def notifications():
         + winning_numbers_drawn.get_all_entries()
         + token_minted_event.get_all_entries()
         + prize_assigned.get_all_entries()
+        + round_finished.get_all_entries()
     )
 
+    for e in events_entries:
+        print(e)
+        print("\n")
+
     events = []
-    for event in events_entries:
-        block_id = str(event.blockNumber)
+    for e in events_entries:
+        block_id = str(e.blockNumber)
+        event = e.event
+        args = e.args
         # Check if the event is already notified
         if not session.get(block_id):
-            session[block_id] = block_id
-            events.append(event.get('event'))
-            
+            session[block_id] = []
+        if event not in session.get(block_id):
+            # check if the event is 'TokenMinted' or 'PrizeAssigned' to update the owner of the collectible
+            if event == "TokenMinted" or event == "PrizeAssigned":
+                # Update the owner of the collectible
+                token_id = int(args._tokenId)
+                COLLECTIBLES[token_id].owner = NftProcessor.owner_of(token_id)
+            session[block_id].append(event)
+            events.append(event + ": " + str(args))
+
     session["events"] = session.get("events", []) + events
 
     if len(events) > 0:
