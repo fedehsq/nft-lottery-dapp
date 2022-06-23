@@ -14,6 +14,7 @@ def index():
         "index.html",
         collectibles=[COLLECTIBLES.get(key) for key in range(1, 10)],
         slideshow_collectibles=[COLLECTIBLES.get(key) for key in range(10, 20)],
+        accounts=w3.eth.accounts
     )
 
 
@@ -37,6 +38,7 @@ def collectibles():
             collectibles=collectibles,
             n_pages=1,
             n_page=1,
+            accounts=w3.eth.accounts
         )
 
     n_page = int(request.args.get("page", 1))
@@ -52,4 +54,5 @@ def collectibles():
         collectibles=collectibles,
         n_pages=n_pages,
         n_page=n_page,
+        accounts=w3.eth.accounts
     )

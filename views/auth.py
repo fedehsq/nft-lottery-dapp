@@ -17,10 +17,10 @@ auth = Blueprint("auth", __name__)
 @auth.route("/auth/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html", next_url = request.args.get("next"))
-        
+        return render_template("login.html", next_url = request.args.get("next"), accounts = w3.eth.accounts)
     address = request.form.get("address")
     next_url = request.form.get("next_url")
+    print(next_url)
     if not address:
         abort(400)
     if w3.isAddress(address) and address in w3.eth.accounts:
@@ -30,7 +30,7 @@ def login():
         return redirect(next_url or url_for("home.index"))
     else:
         flash("Invalid address")
-        return render_template("login.html")
+        return render_template("login.html", accounts = w3.eth.accounts)
 
 
 @auth.route("/auth/account", methods=["GET"])

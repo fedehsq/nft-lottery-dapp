@@ -184,6 +184,7 @@ def close_lottery():
     tx_result = LotteryProcessor.close_lottery()
     if tx_result:
         flash("Lottery closed successfully")
+        TICKETS.clear()
     else:
         flash("Error during closing")
     return redirect(url_for(".lottery_home"))

@@ -9,11 +9,13 @@
         </div>
         <div class="card-body">
             <form method="post" action="{{ url_for('auth.login') }}">
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <input type="text" class="form-control" id="address" name="address"placeholder="Address">
-                    <input type="hidden" id="next_url" name="next_url" value="{{ next_url }}">
-                </div>
+                <p>Address:</p>
+                <select class="form-select" aria-label="Account" id="address" name="address">
+                    {% for account in accounts %}
+                    <option value="{{ account }}">{{ account }}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" id="next_url" name="next_url" value="{{ next_url }}">
                 <button style="border-radius: 32px; background-color: #6C63FF; border: none; margin: 8px;" type="submit"
                     class="btn btn-primary">Login</button>
             </form>

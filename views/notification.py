@@ -36,10 +36,6 @@ def notifications():
         + round_finished.get_all_entries()
     )
 
-    for e in events_entries:
-        print(e)
-        print("\n")
-
     events = []
     for e in events_entries:
         block_id = str(e.blockNumber)
