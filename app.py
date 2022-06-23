@@ -6,6 +6,7 @@ from flask import Flask
 from processors.contract import ContractProcessor
 from config import Development
 from helpers.nft_collectible import NftCollectible
+from processors.lottery import LotteryProcessor
 
 ROUND_DURATION = 2
 # create a web3.py instance w3 by connecting to the local Ethereum node
@@ -27,45 +28,8 @@ lottery_address, lottery_instance = ContractProcessor.deploy_contract(
     "Lottery", nft_address, ROUND_DURATION
 )
 
-# Filter for Lottery events
-lottery_created_event = lottery_instance.events.LotteryCreated.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-round_opened_event = lottery_instance.events.RoundOpened.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-lottery_closed_event = lottery_instance.events.LotteryClosed.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-token_minted_event = lottery_instance.events.TokenMinted.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-ticket_bought_event = lottery_instance.events.TicketBought.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-winning_numbers_drawn = lottery_instance.events.WinningNumbersDrawn.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-prize_assigned = lottery_instance.events.PrizeAssigned.createFilter(
-    fromBlock=1, toBlock="latest"
-)
-
-# Filter for Lottery events
-round_finished = lottery_instance.events.RoundFinished.createFilter(
-    fromBlock=1, toBlock="latest"
-)
+# Initialize the lottery filters for the events
+LotteryProcessor.init_filters()
 
 # Create all the collectibles as map of key:value pairs
 COLLECTIBLES = dict(
@@ -102,10 +66,6 @@ def create_app(config="config.Development"):
     app.register_blueprint(lottery)
     app.register_blueprint(notification)
     lm.init_login_manager(app)
-
-    """@app.before_first_request
-    def before_first_request():
-        listen_for_events.submit()"""
 
     return app
 

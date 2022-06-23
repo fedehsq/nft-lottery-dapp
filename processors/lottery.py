@@ -4,6 +4,50 @@ from processors.contract import ContractProcessor
 
 class LotteryProcessor:
 
+    # Filter for Lottery create event
+    lottery_created_event = None
+
+    # Filter for Lottery open round event
+    round_opened_event = None
+
+    # Filter for Lottery close event
+    lottery_closed_event = None
+
+    # Filter for Lottery draw winning numbers event
+    winning_numbers_drawn_event = None
+
+    # Filter for Lottery assign prize event
+    prize_assigned = None
+
+    # Filter for Lottery mint token event
+    token_minted = None
+
+    @staticmethod
+    def init_filters():
+        from app import lottery_instance
+        """
+        Initialize all the filters for the Lottery contract.
+        """
+        LotteryProcessor.lottery_created_event = lottery_instance.events.LotteryCreated.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+        LotteryProcessor.round_opened_event = lottery_instance.events.RoundOpened.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+        LotteryProcessor.lottery_closed_event = lottery_instance.events.LotteryClosed.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+        LotteryProcessor.winning_numbers_drawn_event = lottery_instance.events.WinningNumbersDrawn.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+        LotteryProcessor.prize_assigned = lottery_instance.events.PrizeAssigned.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+        LotteryProcessor.token_minted = lottery_instance.events.TokenMinted.createFilter(
+            fromBlock=1, toBlock="latest"
+        )
+
+
     @staticmethod
     def is_open():
         """

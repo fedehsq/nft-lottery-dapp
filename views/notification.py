@@ -3,16 +3,7 @@ from flask import (
     session,
 )
 from flask import jsonify
-from app import (
-    lottery_closed_event,
-    lottery_created_event,
-    round_opened_event,
-    ticket_bought_event,
-    winning_numbers_drawn,
-    token_minted_event,
-    prize_assigned,
-    round_finished
-)
+from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
 from app import COLLECTIBLES
 
@@ -23,24 +14,30 @@ notification = Blueprint("notification", __name__)
 def notifications():
     """
     Get all events from the lottery contract.
-    return: status 200 and json object of all notifications if any else 204 (no content) status
+    return: status 200 and json object of all notifications if any
+    else 204 (no content) status or if the user is not logged in or interested in the lottery
     """
+    if not "starting_block" in session:
+        return jsonify(status=204)
+
     events_entries = (
-        lottery_created_event.get_all_entries()
-        + lottery_closed_event.get_all_entries()
-        + round_opened_event.get_all_entries()
-        + ticket_bought_event.get_all_entries()
-        + winning_numbers_drawn.get_all_entries()
-        + token_minted_event.get_all_entries()
-        + prize_assigned.get_all_entries()
-        + round_finished.get_all_entries()
+        LotteryProcessor.lottery_created_event.get_all_entries()
+        + LotteryProcessor.lottery_closed_event.get_all_entries()
+        + LotteryProcessor.round_opened_event.get_all_entries()
+        + LotteryProcessor.winning_numbers_drawn_event.get_all_entries()
+        + LotteryProcessor.prize_assigned.get_all_entries()
+        + LotteryProcessor.token_minted.get_all_entries()
     )
 
     events = []
     for e in events_entries:
-        block_id = str(e.blockNumber)
+        block_id = e.blockNumber
         event = e.event
         args = e.args
+        # Avoid notifications if they was generated before the user logged in
+        if block_id <= session.get("starting_block"):
+            continue
+        block_id = str(e.blockNumber)
         # Check if the event is already notified
         if not session.get(block_id):
             session[block_id] = []
@@ -50,6 +47,9 @@ def notifications():
                 # Update the owner of the collectible
                 token_id = int(args._tokenId)
                 COLLECTIBLES[token_id].owner = NftProcessor.owner_of(token_id)
+            # Not display the event if the event is 'TokenMinted'
+            if event == "TokenMinted":
+                continue
             session[block_id].append(event)
             # get all arguments of the event
             str_args = ""

@@ -11,6 +11,7 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 from app import COLLECTIBLES, w3, manager
 from auth import User
+from processors.lottery import LotteryProcessor
 
 auth = Blueprint("auth", __name__)
 
@@ -20,13 +21,13 @@ def login():
         return render_template("login.html", next_url = request.args.get("next"), accounts = w3.eth.accounts)
     address = request.form.get("address")
     next_url = request.form.get("next_url")
-    print(next_url)
     if not address:
         abort(400)
     if w3.isAddress(address) and address in w3.eth.accounts:
         session['address'] = address
         flash("Successfully authenticated", "success")
-        login_user(User(address, True if address == manager.address else False))
+        user = User(address, True if address == manager.address else False)
+        login_user(user)
         return redirect(next_url or url_for("home.index"))
     else:
         flash("Invalid address")

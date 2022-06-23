@@ -5,6 +5,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    session,
     url_for,
 )
 from flask_login import current_user, login_required
@@ -13,6 +14,7 @@ from auth import manager_required, user_required
 from helpers.ticket import Ticket
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
+from app import w3
 
 
 lottery = Blueprint("lottery", __name__)
@@ -24,7 +26,18 @@ def lottery_home():
     """
     Render the lottery home page
     """
-    return render_template("lottery.html")
+    return render_template("lottery.html", is_open=LotteryProcessor.is_open())
+
+@lottery.route("/lottery/register-user", methods=["GET"])
+@login_required
+@user_required
+def register_user():
+    """
+    Register the user for the lottery
+    """
+    LotteryProcessor.init_filters()
+    session['starting_block'] = w3.eth.block_number
+    return redirect(url_for("lottery.lottery_home"))
 
 
 @lottery.route("/lottery/mint", methods=["POST"])
