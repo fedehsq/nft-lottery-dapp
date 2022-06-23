@@ -7,9 +7,3 @@
 5. ``` sudo truffle compile ```
 6. ``` ganache --account_keys_path ./keys.json```
 7. ``` python app.py ```
-
-
-celery -A background worker -l debug
-celery -A background beat -l debug
-
-celery -A background worker -l debug -B
