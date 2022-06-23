@@ -21,6 +21,9 @@ lottery = Blueprint("lottery", __name__)
 @lottery.route("/lottery", methods=["GET"])
 @login_required
 def lottery_home():
+    """
+    Render the lottery home page
+    """
     return render_template("lottery.html")
 
 
@@ -37,7 +40,7 @@ def mint():
     id = request.form.get("collectibleId")
     if not collectible and not id:
         abort(400)
-    
+
     collectible = COLLECTIBLES.get(int(id))
     tx_result = LotteryProcessor.mint(
         collectible.id, collectible.collectible, collectible.rank
@@ -57,7 +60,6 @@ def mint():
         flash("The token is already owned")
         return redirect(url_for("lottery.lottery_home"))
 
-    
     flash("Error during minting")
     return redirect(url_for("home.index"))
 
@@ -84,7 +86,8 @@ def tickets():
 @user_required
 def buy_ticket():
     """
-    Buy a ticket for the current user.
+    Buy a ticket for the current user and redirect to the home page if the transaction is successful.
+    Else, flash a message and redirect to the home page.
     """
     one = int(request.form.get("one"))
     two = int(request.form.get("two"))
@@ -131,7 +134,8 @@ def buy_ticket():
 @manager_required
 def create_lottery():
     """
-    Create the lottery and redirect to the lottery page.
+    Create the lottery and redirect to the lottery page if the transaction is successful,
+    otherwise redirect to the lottery home page.
     """
 
     tx_result = LotteryProcessor.create_lottery()
@@ -152,6 +156,10 @@ def create_lottery():
 @login_required
 @manager_required
 def open_round():
+    """
+    Open the lottery round and redirect to the lottery page in case of success
+    else, flash a message and redirect to the lottery page.
+    """
     tx_result = LotteryProcessor.open_round()
     if tx_result:
         flash("Round opened successfully")
@@ -185,6 +193,10 @@ def open_round():
 @login_required
 @manager_required
 def close_lottery():
+    """
+    Close the lottery and redirect to the lottery page in case of success
+    else the error message is displayed.
+    """
 
     tx_result = LotteryProcessor.close_lottery()
     if tx_result:
@@ -238,6 +250,11 @@ def extract_winning_ticket():
 @login_required
 @manager_required
 def give_prizes():
+    """
+    Give the prizes to the winners and redirect to the lottery page in case of success
+    else the error message is displayed.
+    """
+
     tx_result = LotteryProcessor.give_prizes()
     if tx_result:
         flash("Prizes given successfully")

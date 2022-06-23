@@ -1,3 +1,4 @@
+import json
 import os
 import random
 from web3 import Web3, HTTPProvider
@@ -11,8 +12,11 @@ from helpers.nft_collectible import NftCollectible
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
+# Get the private key from the json file 'keys.json'
+manager_pkey = open("./keys.json").read()
+manager_pkey = json.loads(manager_pkey)["private_keys"][w3.eth.accounts[0].lower()]
 manager = w3.eth.account.from_key(
-    "0x4cd1c04af82b67e246effbe673bfff4d525e27cb8606bd9376d311b5b630925d"
+    manager_pkey
 )
 
 # Nft contract address and ABI
