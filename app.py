@@ -7,7 +7,7 @@ from processors.contract import ContractProcessor
 from config import Development
 from helpers.nft_collectible import NftCollectible
 
-
+ROUND_DURATION = 2
 # create a web3.py instance w3 by connecting to the local Ethereum node
 w3 = Web3(HTTPProvider("http://localhost:8545"))
 
@@ -24,7 +24,7 @@ nft_address, nft_instance = ContractProcessor.deploy_contract("NFT")
 
 # Lottery contract address and ABI (pass Nft contract address as parameter)
 lottery_address, lottery_instance = ContractProcessor.deploy_contract(
-    "Lottery", nft_address, 2
+    "Lottery", nft_address, ROUND_DURATION
 )
 
 # Filter for Lottery events
