@@ -12,7 +12,7 @@ w3 = Web3(HTTPProvider("http://localhost:8545"))
 
 # Initialize a local account object from the private key of a valid Ethereum node address
 manager = w3.eth.account.from_key(
-    "0xbdb47e6a5f00b0f1e8833e5716104f2d9c2cc3ffe0db699652ee024e074e647e"
+    "0x4cd1c04af82b67e246effbe673bfff4d525e27cb8606bd9376d311b5b630925d"
 )
 
 # Nft contract address and ABI

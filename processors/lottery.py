@@ -65,7 +65,7 @@ class LotteryProcessor:
             )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
-            return tx_receipt["status"], "Collectible minted successfully"
+            return tx_receipt["status"]
         except Exception as e:
             print(e)
             return 0
