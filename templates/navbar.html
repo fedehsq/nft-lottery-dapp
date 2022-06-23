@@ -1,7 +1,7 @@
 <body class="d-flex flex-column min-vh-100" style="font-family: 'Poppins', sans-serif;;">
     <nav class="navbar sticky-top navbar-expand-md navbar-light" style="background-color: white;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); font-family: 'Poppins', sans-serif;">
-        <a class="navbar-brand" href="/" style="margin-left: 20px;">
+        <a class="navbar-brand" href="/">
             <img class="rounded" src="{{ url_for('static', filename='images/logo.webp') }}"
                 style="width: 90px; margin-left: 80px;" alt="logo">
         </a>
@@ -29,8 +29,8 @@
                     {% endfor %}
                     {% if session['events']|length > 0 %}
                     <button id="delete-notifications-btn"
-                        style="border-radius: 32px; background-color: red; border: none; font-size: 12px;" type="button"
-                        class="btn btn-primary">Delete</button>
+                        style="background-color: red; font-size: 12;" type="button"
+                        class="btn-rounded">Delete</button>
                     {% endif %}
                 </div>
             </li>

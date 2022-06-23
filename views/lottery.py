@@ -37,6 +37,15 @@ def mint():
     id = request.form.get("collectibleId")
     if not collectible and not id:
         abort(400)
+    
+    collectible = COLLECTIBLES.get(int(id))
+    tx_result = LotteryProcessor.mint(
+        collectible.id, collectible.collectible, collectible.rank
+    )
+    if tx_result:
+        flash("Collectible minted successfully")
+        COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
+        return redirect(url_for("home.index"))
 
     # Check if the lottery is open
     if not LotteryProcessor.is_open():
@@ -48,15 +57,8 @@ def mint():
         flash("The token is already owned")
         return redirect(url_for("lottery.lottery_home"))
 
-    collectible = COLLECTIBLES.get(int(id))
-    tx_result = LotteryProcessor.mint(
-        collectible.id, collectible.collectible, collectible.rank
-    )
-    if tx_result:
-        flash("Collectible minted successfully")
-        COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
-    else:
-        flash("Error during minting")
+    
+    flash("Error during minting")
     return redirect(url_for("home.index"))
 
 
@@ -93,16 +95,6 @@ def buy_ticket():
     if not one or not two or not three or not four or not five or not powerball:
         abort(400)
 
-    # Check if the lottery is open
-    if not LotteryProcessor.is_open():
-        flash("The lottery is closed")
-        return redirect(url_for("lottery.lottery_home"))
-
-    # Check if the round is active
-    if not LotteryProcessor.is_round_active():
-        flash("The round is not active")
-        return redirect(url_for("lottery.lottery_home"))
-
     tx_result = LotteryProcessor.buy_ticket(one, two, three, four, five, powerball)
     if tx_result:
         flash("Tickets bought successfully")
@@ -117,9 +109,21 @@ def buy_ticket():
                 powerball=powerball,
             )
         )
-    else:
-        flash("Error during buying")
-    return redirect(url_for(".lottery_home"))
+        return redirect(url_for(".lottery_home"))
+
+    # Check if the lottery is open
+    if not LotteryProcessor.is_open():
+        flash("The lottery is closed")
+        return redirect(url_for("lottery.lottery_home"))
+
+    # Check if the round is active
+    if not LotteryProcessor.is_round_active():
+        flash("The round is not active")
+        return redirect(url_for("lottery.lottery_home"))
+
+    # Generic error message
+    flash("Error during buying tickets")
+    return redirect(url_for("lottery.lottery_home"))
 
 
 @lottery.route("/lottery/create-lottery", methods=["GET"])
@@ -130,16 +134,17 @@ def create_lottery():
     Create the lottery and redirect to the lottery page.
     """
 
+    tx_result = LotteryProcessor.create_lottery()
+    if tx_result:
+        flash("Lottery created successfully")
+        return redirect(url_for("lottery.lottery_home"))
+
     # Check if the lottery is open
     if LotteryProcessor.is_open():
         flash("The lottery is already open")
         return redirect(url_for("lottery.lottery_home"))
 
-    tx_result = LotteryProcessor.create_lottery()
-    if tx_result:
-        flash("Lottery created successfully")
-    else:
-        flash("Error during creation")
+    flash("Error during creation")
     return redirect(url_for(".lottery_home"))
 
 
@@ -147,6 +152,10 @@ def create_lottery():
 @login_required
 @manager_required
 def open_round():
+    tx_result = LotteryProcessor.open_round()
+    if tx_result:
+        flash("Round opened successfully")
+        return redirect(url_for("lottery.lottery_home"))
 
     # Check if the lottery is open
     if not LotteryProcessor.is_open():
@@ -158,16 +167,17 @@ def open_round():
         flash("The round is already active")
         return redirect(url_for("lottery.lottery_home"))
 
+    # Check if the round is finished
+    if not LotteryProcessor.is_round_finished():
+        flash("The round is not finished")
+        return redirect(url_for("lottery.lottery_home"))
+
     # Check if the winning ticket is already set
     if not LotteryProcessor.is_winning_ticket_extracted():
         flash("The winning ticket is not extracted")
         return redirect(url_for("lottery.lottery_home"))
 
-    tx_result = LotteryProcessor.open_round()
-    if tx_result:
-        flash("Round opened successfully")
-    else:
-        flash("Error during opening")
+    flash("Error during opening")
     return redirect(url_for(".lottery_home"))
 
 
@@ -176,17 +186,18 @@ def open_round():
 @manager_required
 def close_lottery():
 
-    # Check if the lottery is open
-    if not LotteryProcessor.is_open():
-        flash("The lottery already is closed")
-        return redirect(url_for("lottery.lottery_home"))
-
     tx_result = LotteryProcessor.close_lottery()
     if tx_result:
         flash("Lottery closed successfully")
         TICKETS.clear()
-    else:
-        flash("Error during closing")
+        return redirect(url_for("lottery.lottery_home"))
+
+    # Check if the lottery is open
+    if not LotteryProcessor.is_open():
+        flash("The lottery is already closed")
+        return redirect(url_for("lottery.lottery_home"))
+
+    flash("Error during closing")
     return redirect(url_for(".lottery_home"))
 
 
@@ -194,6 +205,10 @@ def close_lottery():
 @login_required
 @manager_required
 def extract_winning_ticket():
+    tx_result = LotteryProcessor.extract_winning_ticket()
+    if tx_result:
+        flash("Winning ticket extracted successfully")
+        return redirect(url_for(".lottery_home"))
 
     # Check if the lottery is open
     if not LotteryProcessor.is_open():
@@ -215,11 +230,7 @@ def extract_winning_ticket():
         flash("The winning ticket is already extracted")
         return redirect(url_for("lottery.lottery_home"))
 
-    tx_result = LotteryProcessor.extract_winning_ticket()
-    if tx_result:
-        flash("Winning ticket extracted successfully")
-    else:
-        flash("Error during extraction")
+    flash("Error during extraction")
     return redirect(url_for(".lottery_home"))
 
 
@@ -227,6 +238,12 @@ def extract_winning_ticket():
 @login_required
 @manager_required
 def give_prizes():
+    tx_result = LotteryProcessor.give_prizes()
+    if tx_result:
+        flash("Prizes given successfully")
+        # Clear the tickets
+        TICKETS.clear()
+        return redirect(url_for(".lottery_home"))
 
     # Check if the lottery is open
     if not LotteryProcessor.is_open():
@@ -248,11 +265,5 @@ def give_prizes():
         flash("The winning ticket is not yet extracted")
         return redirect(url_for("lottery.lottery_home"))
 
-    tx_result = LotteryProcessor.give_prizes()
-    if tx_result:
-        flash("Prizes given successfully")
-        # Clear the tickets
-        TICKETS.clear()
-    else:
-        flash("Error during giving prizes")
+    flash("Error during giving prizes")
     return redirect(url_for(".lottery_home"))
