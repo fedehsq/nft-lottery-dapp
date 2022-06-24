@@ -98,7 +98,7 @@ class LotteryProcessor:
         :param rank: rank of the collectible
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager, nft_instance
+        from app import w3, lottery_instance, lottery_address, manager
        
         try:
             tx = ContractProcessor.create_transaction(
@@ -128,7 +128,7 @@ class LotteryProcessor:
         :param powerball: powerball number
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
+        from app import w3, lottery_instance, lottery_address
         # 
 
         try:

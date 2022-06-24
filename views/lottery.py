@@ -24,9 +24,17 @@ lottery = Blueprint("lottery", __name__)
 @login_required
 def lottery_home():
     """
-    Render the lottery home page
+    Render the lottery homepage
     """
-    return render_template("lottery.html", is_open=LotteryProcessor.is_open())
+    if current_user.is_admin:
+        return render_template("manager_lottery.html")
+    else:
+        return render_template(
+            "user_lottery.html",
+            is_open=LotteryProcessor.is_open(),
+            registered=session.get("starting_block", None)
+        )
+
 
 @lottery.route("/lottery/register-user", methods=["GET"])
 @login_required
@@ -36,7 +44,7 @@ def register_user():
     Register the user for the lottery
     """
     LotteryProcessor.init_filters()
-    session['starting_block'] = w3.eth.block_number
+    session["starting_block"] = w3.eth.block_number
     return redirect(url_for("lottery.lottery_home"))
 
 
@@ -61,20 +69,20 @@ def mint():
     if tx_result:
         flash("Collectible minted successfully")
         COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
-        return redirect(url_for("home.index"))
+        return redirect(request.referrer or url_for("home.index"))
 
     # Check if the lottery is open
     if not LotteryProcessor.is_open():
         flash("The lottery is closed")
-        return redirect(url_for("lottery.lottery_home"))
+        return redirect(request.referrer or url_for("lottery.lottery_home"))
 
     # Check if the token is already owned
     if LotteryProcessor.is_already_minted(int(id)):
         flash("The token is already owned")
-        return redirect(url_for("lottery.lottery_home"))
+        return redirect(request.referrer or url_for("lottery.lottery_home"))
 
     flash("Error during minting")
-    return redirect(url_for("home.index"))
+    return redirect(request.referrer or url_for("home.index"))
 
 
 @lottery.route("/lottery/tickets", methods=["GET"])
