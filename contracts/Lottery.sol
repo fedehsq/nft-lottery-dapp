@@ -332,7 +332,7 @@ contract Lottery {
         );
         return
             uint256(
-                keccak256(abi.encode(blockhash(kParam + endRoundBlock), seed))
+                keccak256(abi.encode(blockhash(kParam + endRoundBlock), endRoundBlock, kParam, seed))
             );
     }
 
