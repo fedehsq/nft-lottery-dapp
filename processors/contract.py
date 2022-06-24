@@ -1,9 +1,11 @@
 import json
 
+
 class ContractProcessor:
     """
     This class is used to process the contract generic calls.
     """
+
     ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 
     @staticmethod
@@ -15,6 +17,7 @@ class ContractProcessor:
         :return: The address of the contract and the contract instance.
         """
         from app import w3, manager
+
         truffle_file = json.load(open("./build/contracts/" + contract_name + ".json"))
         abi = truffle_file["abi"]
         bytecode = truffle_file["bytecode"]
@@ -46,7 +49,6 @@ class ContractProcessor:
         contract_instance = w3.eth.contract(abi=abi, address=contract_address)
         return contract_address, contract_instance
 
-
     @staticmethod
     def create_transaction(_from: str, _to: str, _value: int):
         """
@@ -57,6 +59,7 @@ class ContractProcessor:
         :return: A transaction object.
         """
         from app import w3
+
         wei = w3.toWei(_value, "ether")
         tx = {
             "from": _from,

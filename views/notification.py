@@ -15,7 +15,7 @@ def notifications():
     """
     Get all events from the lottery contract.
     return: status 200 and json object of all notifications if any
-    else 204 (no content) status or if the user is not logged in or interested in the lottery
+    else 204 (no content / user not interested in the lottery)
     """
     if not "starting_block" in session:
         return jsonify(status=204)
@@ -28,6 +28,9 @@ def notifications():
         + LotteryProcessor.prize_assigned.get_all_entries()
         + LotteryProcessor.token_minted.get_all_entries()
     )
+
+    # order the events by block number in ascending order
+    events_entries.sort(key=lambda x: x.blockNumber)
 
     events = []
     for e in events_entries:

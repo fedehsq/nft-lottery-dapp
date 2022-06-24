@@ -25,28 +25,40 @@ class LotteryProcessor:
     @staticmethod
     def init_filters():
         from app import lottery_instance
+
         """
         Initialize all the filters for the Lottery contract.
         """
-        LotteryProcessor.lottery_created_event = lottery_instance.events.LotteryCreated.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.lottery_created_event = (
+            lottery_instance.events.LotteryCreated.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-        LotteryProcessor.round_opened_event = lottery_instance.events.RoundOpened.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.round_opened_event = (
+            lottery_instance.events.RoundOpened.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-        LotteryProcessor.lottery_closed_event = lottery_instance.events.LotteryClosed.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.lottery_closed_event = (
+            lottery_instance.events.LotteryClosed.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-        LotteryProcessor.winning_numbers_drawn_event = lottery_instance.events.WinningNumbersDrawn.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.winning_numbers_drawn_event = (
+            lottery_instance.events.WinningNumbersDrawn.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-        LotteryProcessor.prize_assigned = lottery_instance.events.PrizeAssigned.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.prize_assigned = (
+            lottery_instance.events.PrizeAssigned.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-        LotteryProcessor.token_minted = lottery_instance.events.TokenMinted.createFilter(
-            fromBlock=1, toBlock="latest"
+        LotteryProcessor.token_minted = (
+            lottery_instance.events.TokenMinted.createFilter(
+                fromBlock=1, toBlock="latest"
+            )
         )
-
 
     @staticmethod
     def is_open():
@@ -54,8 +66,9 @@ class LotteryProcessor:
         :return: True if the lottery is open, False otherwise
         """
         from app import lottery_instance
+
         return lottery_instance.functions.isLotteryActive().call()
-    
+
     @staticmethod
     def is_already_minted(id: int):
         """
@@ -63,22 +76,27 @@ class LotteryProcessor:
         :return: True if the collectible is already minted, False otherwise
         """
         from app import nft_instance
-        return nft_instance.functions.ownerOf(id).call() != ContractProcessor.ADDRESS_ZERO
-    
+
+        return (
+            nft_instance.functions.ownerOf(id).call() != ContractProcessor.ADDRESS_ZERO
+        )
+
     @staticmethod
     def is_round_active():
         """
         :return: True if the round is active, False otherwise
         """
         from app import lottery_instance
+
         return lottery_instance.functions.isRoundActive().call()
-    
+
     @staticmethod
     def is_round_finished():
         """
         :return: True if the round is finished, False otherwise
         """
         from app import lottery_instance
+
         return lottery_instance.functions.isRoundFinished().call()
 
     @staticmethod
@@ -87,6 +105,7 @@ class LotteryProcessor:
         :return: True if the winning ticket is already extracted, False otherwise
         """
         from app import lottery_instance
+
         return lottery_instance.functions.areNumbersDrawn().call()
 
     @staticmethod
@@ -99,7 +118,7 @@ class LotteryProcessor:
         :return: Transaction result
         """
         from app import w3, lottery_instance, lottery_address, manager
-       
+
         try:
             tx = ContractProcessor.create_transaction(
                 manager.address, lottery_address, 0
@@ -129,7 +148,6 @@ class LotteryProcessor:
         :return: Transaction result
         """
         from app import w3, lottery_instance, lottery_address
-        # 
 
         try:
             tx = ContractProcessor.create_transaction(
