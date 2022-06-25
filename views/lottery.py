@@ -1,3 +1,4 @@
+import random
 from flask import (
     Blueprint,
     abort,
@@ -63,12 +64,14 @@ def mint():
         abort(400)
 
     collectible = COLLECTIBLES.get(int(id))
+    rank = random.randint(1, 8)
     tx_result = LotteryProcessor.mint(
-        collectible.id, collectible.collectible, collectible.rank
+        collectible.id, collectible.collectible, rank
     )
     if tx_result:
         flash("Collectible minted successfully")
         COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
+        COLLECTIBLES[int(id)].rank = rank
         return redirect(request.referrer or url_for("home.index"))
 
     # Check if the lottery is open

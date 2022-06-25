@@ -50,7 +50,7 @@ contract Lottery {
         uint256 _powerball
     );
 
-    event PrizeAssigned(address _to, uint256 _tokenId, string _image);
+    event PrizeAssigned(address _to, uint256 _tokenId, string _image, uint256 _rank);
 
     event RoundFinished();
 
@@ -400,8 +400,14 @@ contract Lottery {
                 uint256 id = 0;
                 // if the class is empty, mint a new collectible for the winner
                 if (collectibles[classPrize].length == 0) {
-                    autoMint();
-                    id = tokenId;
+                    id = tokenId + 1;
+                    mint(id, classPrize, string(
+                        abi.encodePacked(
+                            COLLECTIBLES_REPO,
+                            Strings.toString(id),
+                            ".svg"
+                        )
+                    ));
                     nft.transferFrom(address(this), tickets[i].owner, id);
                 } else {
                     uint256 collectibleIndex = tokenId %
@@ -416,8 +422,14 @@ contract Lottery {
                         nft.transferFrom(address(this), tickets[i].owner, id);
                     } else {
                         // mint a new collectible for the winner
-                        autoMint();
-                        id = tokenId;
+                        id = tokenId + 1;
+                        mint(id, classPrize, string(
+                            abi.encodePacked(
+                                COLLECTIBLES_REPO,
+                                Strings.toString(id),
+                                ".svg"
+                            )
+                        ));
                         nft.transferFrom(address(this), tickets[i].owner, id);
                     }
                 }
@@ -430,7 +442,8 @@ contract Lottery {
                             Strings.toString(tokenId),
                             ".svg"
                         )
-                    )
+                    ),
+                    classPrize
                 );
             }
         }

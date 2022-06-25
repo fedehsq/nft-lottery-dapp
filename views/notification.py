@@ -34,9 +34,11 @@ def notifications():
 
     events = []
     for e in events_entries:
+        print(e, "\n")
         block_id = e.blockNumber
         event = e.event
         args = e.args
+        log_index = e.logIndex
         # Avoid notifications if they was generated before the user logged in
         if block_id <= session.get("starting_block"):
             continue
@@ -44,16 +46,19 @@ def notifications():
         # Check if the event is already notified
         if not session.get(block_id):
             session[block_id] = []
-        if event not in session.get(block_id):
+        if (event, log_index) not in session.get(block_id):
             # check if the event is 'TokenMinted' or 'PrizeAssigned' to update the owner of the collectible
             if event == "TokenMinted" or event == "PrizeAssigned":
                 # Update the owner of the collectible
                 token_id = int(args._tokenId)
                 COLLECTIBLES[token_id].owner = NftProcessor.owner_of(token_id)
+                # Assign the proper rank to the collectible
+                if event ==  "PrizeAssigned":
+                    COLLECTIBLES[token_id].rank = int(args._rank)
             # Not display the event if the event is 'TokenMinted'
             if event == "TokenMinted":
                 continue
-            session[block_id].append(event)
+            session[block_id].append((event, log_index))
             # get all arguments of the event
             str_args = ""
             for k, v in args.items():

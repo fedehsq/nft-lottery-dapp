@@ -39,7 +39,7 @@ COLLECTIBLES = dict(
             NftCollectible(
                 id=int(collectible[:-4]),
                 collectible=collectible,
-                rank=random.randint(1, 8),
+                rank=0,
                 owner=ContractProcessor.ADDRESS_ZERO,
             ),
         )

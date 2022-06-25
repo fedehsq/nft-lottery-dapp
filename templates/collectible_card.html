@@ -9,8 +9,10 @@
     <div class="card-body">
         <h5 style="text-align: center; margin: 32px;" class="card-title">{{
             collectible.collectible }}</h5>
-        <p style="text-align: center;" class="card-text">Owner: <span style="font-weight: bold; font-size: small;">{{
-                collectible.owner }}</span></p>
+        <p style="text-align: center;" class="card-text">Owner: <span style="font-weight: bold; font-size: small;">{{ collectible.owner }}</span></p>
+        {% if collectible.rank > 0 %}
+        <p style="text-align: center;" class="card-text">Rank: <span style="font-weight: bold; font-size: small;">{{ collectible.rank }}</span></p>
+        {% endif %}
 
         {% if current_user.is_authenticated %}
         {% if current_user.is_admin %}

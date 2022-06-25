@@ -5,7 +5,7 @@
 <!-- slideshow -->
 <h1 style="margin-top: 32px; text-align: center;">TRY: a nfT lotteRY</h1>
 <h4 style="margin-bottom: 32px; text-align: center; color: grey;">Win fantastic collectibles</h4>
-<div id="carouselHome" class="carousel slide" data-ride="carousel" style="height: 600px;">
+<div id="carouselHome" class="carousel slide" data-ride="carousel" style="height: 650px;">
     <ol class="carousel-indicators">
         {% for collectible in slideshow_collectibles %}
         <li data-target="#carouselHome" data-slide-to="{{ loop.index }}" {% if loop.index==1 %} class="active" {% endif
@@ -21,6 +21,10 @@
                     collectible }}>
             </a>
             <h5 style="text-align: center;">{{ collectible.collectible }}</h5>
+            {% if collectible.rank > 0 %}
+            <p style="text-align: center;" class="card-text">Rank: <span style="font-weight: bold; font-size: small;">{{
+                collectible.rank }}</span></p>
+            {% endif %}
             <p style="text-align: center;">Owner: <span style="font-weight: bold; font-size: small;">{{
                     collectible.owner }}</span> <br>
 
