@@ -13,9 +13,7 @@ class NftProcessor:
         :param id: id of the collectible
         :return: owner of the collectible
         """
-        from app import nft_instance
-
-        return nft_instance.functions.ownerOf(id).call()
+        return ContractProcessor.nft_instance.functions.ownerOf(id).call()
 
     @staticmethod
     def balance_of(address: str):
@@ -24,9 +22,7 @@ class NftProcessor:
         :param address: address
         :return: balance of the address
         """
-        from app import nft_instance
-
-        return nft_instance.functions.balanceOf(address).call()
+        return ContractProcessor.nft_instance.functions.balanceOf(address).call()
 
     # @staticmethod
     # def transfer_from(_from: str, to: str, token_id: int):

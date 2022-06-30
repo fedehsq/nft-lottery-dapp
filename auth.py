@@ -4,6 +4,8 @@ from app import w3, manager
 import enum
 from functools import wraps
 
+from processors.contract import ContractProcessor
+
 
 class User(UserMixin):
     """
@@ -25,6 +27,18 @@ def manager_required(f):
         if not current_user.is_admin:
             flash("Only the owner can perform this operation")
             return redirect(url_for("home.index"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def deployed_required(f):
+    """
+    Decorator for views that require the smart contracts to be deployed.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not ContractProcessor.LOTTERY_DEPLOYED:
+            flash("The smart contracts are not deployed yet")
+            return redirect(url_for("lottery.lottery_home"))
         return f(*args, **kwargs)
     return decorated_function
 

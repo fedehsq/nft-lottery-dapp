@@ -1,5 +1,7 @@
+from time import sleep
 from flask_login import current_user
 from processors.contract import ContractProcessor
+from app import w3, manager, executor
 
 
 class LotteryProcessor:
@@ -23,51 +25,56 @@ class LotteryProcessor:
     token_minted = None
 
     @staticmethod
+    @executor.job
     def init_filters():
-        from app import lottery_instance
 
         """
-        Initialize all the filters for the Lottery contract.
+        Initialize all the filters for the Lottery contract when the contract is deployed.
+        Otherwise, the filters will be initialized when the contract is deployed.
         """
-        LotteryProcessor.lottery_created_event = (
-            lottery_instance.events.LotteryCreated.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
-        LotteryProcessor.round_opened_event = (
-            lottery_instance.events.RoundOpened.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
-        LotteryProcessor.lottery_closed_event = (
-            lottery_instance.events.LotteryClosed.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
-        LotteryProcessor.winning_numbers_drawn_event = (
-            lottery_instance.events.WinningNumbersDrawn.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
-        LotteryProcessor.prize_assigned = (
-            lottery_instance.events.PrizeAssigned.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
-        LotteryProcessor.token_minted = (
-            lottery_instance.events.TokenMinted.createFilter(
-                fromBlock=1, toBlock="latest"
-            )
-        )
+        while True:
+            if ContractProcessor.LOTTERY_DEPLOYED:
+                LotteryProcessor.lottery_created_event = (
+                    ContractProcessor.lottery_instance.events.LotteryCreated.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                LotteryProcessor.round_opened_event = (
+                    ContractProcessor.lottery_instance.events.RoundOpened.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                LotteryProcessor.lottery_closed_event = (
+                    ContractProcessor.lottery_instance.events.LotteryClosed.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                LotteryProcessor.winning_numbers_drawn_event = (
+                    ContractProcessor.lottery_instance.events.WinningNumbersDrawn.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                LotteryProcessor.prize_assigned = (
+                    ContractProcessor.lottery_instance.events.PrizeAssigned.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                LotteryProcessor.token_minted = (
+                    ContractProcessor.lottery_instance.events.TokenMinted.createFilter(
+                        fromBlock=1, toBlock="latest"
+                    )
+                )
+                break
+            else:
+                sleep(10)
 
     @staticmethod
     def is_open():
         """
         :return: True if the lottery is open, False otherwise
         """
-        from app import lottery_instance
 
-        return lottery_instance.functions.isLotteryActive().call()
+        return ContractProcessor.lottery_instance.functions.isLotteryActive().call()
 
     @staticmethod
     def is_already_minted(id: int):
@@ -75,10 +82,8 @@ class LotteryProcessor:
         :param id: id of the collectible
         :return: True if the collectible is already minted, False otherwise
         """
-        from app import nft_instance
-
         return (
-            nft_instance.functions.ownerOf(id).call() != ContractProcessor.ADDRESS_ZERO
+            ContractProcessor.nft_instance.functions.ownerOf(id).call() != ContractProcessor.ADDRESS_ZERO
         )
 
     @staticmethod
@@ -86,27 +91,24 @@ class LotteryProcessor:
         """
         :return: True if the round is active, False otherwise
         """
-        from app import lottery_instance
 
-        return lottery_instance.functions.isRoundActive().call()
+        return ContractProcessor.lottery_instance.functions.isRoundActive().call()
 
     @staticmethod
     def is_round_finished():
         """
         :return: True if the round is finished, False otherwise
         """
-        from app import lottery_instance
 
-        return lottery_instance.functions.isRoundFinished().call()
+        return ContractProcessor.lottery_instance.functions.isRoundFinished().call()
 
     @staticmethod
     def is_winning_ticket_extracted():
         """
         :return: True if the winning ticket is already extracted, False otherwise
         """
-        from app import lottery_instance
 
-        return lottery_instance.functions.areNumbersDrawn().call()
+        return ContractProcessor.lottery_instance.functions.areNumbersDrawn().call()
 
     @staticmethod
     def mint(id: int, collectible: str, rank: int):
@@ -117,15 +119,13 @@ class LotteryProcessor:
         :param rank: rank of the collectible
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
         try:
             tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
+                manager.address, ContractProcessor.lottery_address, 0
             )
-            tx_hash = lottery_instance.functions.mint(id, rank, collectible).transact(
-                tx
-            )
+            tx_hash = ContractProcessor.lottery_instance.functions.mint(
+                id, rank, collectible
+            ).transact(tx)
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]
@@ -147,35 +147,13 @@ class LotteryProcessor:
         :param powerball: powerball number
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address
-
         try:
             tx = ContractProcessor.create_transaction(
-                current_user.id, lottery_address, 1
+                current_user.id, ContractProcessor.lottery_address, 1
             )
-            tx_hash = lottery_instance.functions.buy(
+            tx_hash = ContractProcessor.lottery_instance.functions.buy(
                 one, two, three, four, five, powerball
             ).transact(tx)
-            tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-            print(tx_receipt)
-            return tx_receipt["status"]
-        except Exception as e:
-            print(e)
-            return 0
-
-    @staticmethod
-    def create_lottery():
-        """
-        Create the lottery
-        :return: Transaction result
-        """
-        from app import w3, lottery_instance, lottery_address, manager
-
-        try:
-            tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
-            )
-            tx_hash = lottery_instance.functions.createLottery().transact(tx)
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]
@@ -189,13 +167,13 @@ class LotteryProcessor:
         Open the round
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
         try:
             tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
+                manager.address, ContractProcessor.lottery_address, 0
             )
-            tx_hash = lottery_instance.functions.openRound().transact(tx)
+            tx_hash = ContractProcessor.lottery_instance.functions.openRound().transact(
+                tx
+            )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]
@@ -209,13 +187,13 @@ class LotteryProcessor:
         Close the lottery
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
         try:
             tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
+                manager.address, ContractProcessor.lottery_address, 0
             )
-            tx_hash = lottery_instance.functions.closeLottery().transact(tx)
+            tx_hash = (
+                ContractProcessor.lottery_instance.functions.closeLottery().transact(tx)
+            )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]
@@ -229,13 +207,13 @@ class LotteryProcessor:
         Extract the winning ticket
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
         try:
             tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
+                manager.address, ContractProcessor.lottery_address, 0
             )
-            tx_hash = lottery_instance.functions.drawNumbers().transact(tx)
+            tx_hash = (
+                ContractProcessor.lottery_instance.functions.drawNumbers().transact(tx)
+            )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]
@@ -249,13 +227,13 @@ class LotteryProcessor:
         Give the prizes
         :return: Transaction result
         """
-        from app import w3, lottery_instance, lottery_address, manager
-
         try:
             tx = ContractProcessor.create_transaction(
-                manager.address, lottery_address, 0
+                manager.address, ContractProcessor.lottery_address, 0
             )
-            tx_hash = lottery_instance.functions.givePrizes().transact(tx)
+            tx_hash = (
+                ContractProcessor.lottery_instance.functions.givePrizes().transact(tx)
+            )
             tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
             print(tx_receipt)
             return tx_receipt["status"]

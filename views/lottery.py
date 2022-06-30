@@ -11,8 +11,9 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from app import COLLECTIBLES, TICKETS
-from auth import manager_required, user_required
+from auth import deployed_required, manager_required, user_required
 from helpers.ticket import Ticket
+from processors.contract import ContractProcessor
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
 from app import w3
@@ -30,10 +31,13 @@ def lottery_home():
     if current_user.is_admin:
         return render_template("manager_lottery.html")
     else:
+        is_open = False
+        if ContractProcessor.LOTTERY_DEPLOYED:
+            is_open = LotteryProcessor.is_open()
         return render_template(
             "user_lottery.html",
-            is_open=LotteryProcessor.is_open(),
-            registered=session.get("starting_block", None)
+            is_open=is_open,
+            registered=session.get("starting_block", None),
         )
 
 
@@ -44,14 +48,21 @@ def register_user():
     """
     Register the user for the lottery
     """
-    LotteryProcessor.init_filters()
-    session["starting_block"] = w3.eth.block_number
-    return redirect(url_for("lottery.lottery_home"))
+    if not session.get("starting_block"):
+        LotteryProcessor.init_filters.submit()
+        session["starting_block"] = w3.eth.block_number if w3.eth.block_number else 1
+        flash("You have been registered for the lottery")
+        print(session.get("starting_block"))
+        return redirect(url_for("lottery.lottery_home"))
+    else:
+        flash("You have already registered for the lottery")
+        return redirect(url_for("lottery.lottery_home"))
 
 
 @lottery.route("/lottery/mint", methods=["POST"])
 @login_required
 @manager_required
+@deployed_required
 def mint():
     """
     Mint a new token for the current user, and redirect to the home page.
@@ -65,9 +76,7 @@ def mint():
 
     collectible = COLLECTIBLES.get(int(id))
     rank = random.randint(1, 8)
-    tx_result = LotteryProcessor.mint(
-        collectible.id, collectible.collectible, rank
-    )
+    tx_result = LotteryProcessor.mint(collectible.id, collectible.collectible, rank)
     if tx_result:
         flash("Collectible minted successfully")
         COLLECTIBLES[int(id)].owner = NftProcessor.owner_of(collectible.id)
@@ -90,6 +99,7 @@ def mint():
 
 @lottery.route("/lottery/tickets", methods=["GET"])
 @login_required
+@deployed_required
 def tickets():
     """
     Display the tickets.
@@ -108,6 +118,7 @@ def tickets():
 @lottery.route("/lottery/buy-ticket", methods=["POST"])
 @login_required
 @user_required
+@deployed_required
 def buy_ticket():
     """
     Buy a ticket for the current user and redirect to the home page if the transaction is successful.
@@ -161,24 +172,29 @@ def create_lottery():
     Create the lottery and redirect to the lottery page if the transaction is successful,
     otherwise redirect to the lottery home page.
     """
-
-    tx_result = LotteryProcessor.create_lottery()
-    if tx_result:
-        flash("Lottery created successfully")
-        return redirect(url_for("lottery.lottery_home"))
+    # Deploy the smart contracts
+    if not ContractProcessor.LOTTERY_DEPLOYED:
+        if ContractProcessor.deploy_contracts():
+            flash("Lottery deployed successfully")
+            return redirect(url_for("lottery.lottery_home"))
+        else:
+            flash("Error during lottery deployment")
+            return redirect(url_for("lottery.lottery_home"))
 
     # Check if the lottery is open
     if LotteryProcessor.is_open():
         flash("The lottery is already open")
         return redirect(url_for("lottery.lottery_home"))
 
-    flash("Error during creation")
-    return redirect(url_for(".lottery_home"))
+    else:
+        flash("The lottery is closed")
+        return redirect(request.referrer or url_for("lottery.lottery_home"))
 
 
 @lottery.route("/lottery/open-round", methods=["GET"])
 @login_required
 @manager_required
+@deployed_required
 def open_round():
     """
     Open the lottery round and redirect to the lottery page in case of success
@@ -216,6 +232,7 @@ def open_round():
 @lottery.route("/lottery/close-lottery", methods=["GET"])
 @login_required
 @manager_required
+@deployed_required
 def close_lottery():
     """
     Close the lottery and redirect to the lottery page in case of success
@@ -240,6 +257,7 @@ def close_lottery():
 @lottery.route("/lottery/extract-winning-ticket", methods=["GET"])
 @login_required
 @manager_required
+@deployed_required
 def extract_winning_ticket():
     tx_result = LotteryProcessor.extract_winning_ticket()
     if tx_result:
@@ -273,6 +291,7 @@ def extract_winning_ticket():
 @lottery.route("/lottery/give-prizes", methods=["GET"])
 @login_required
 @manager_required
+@deployed_required
 def give_prizes():
     """
     Give the prizes to the winners and redirect to the lottery page in case of success

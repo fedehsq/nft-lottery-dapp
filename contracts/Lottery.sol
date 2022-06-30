@@ -86,14 +86,6 @@ contract Lottery {
         manager = msg.sender;
         nft = NFT(_nftAddress);
         roundDuration = _roundDuration;
-    }
-
-    /// @notice Open the lottery
-    /// @dev Throws unless `msg.sender` is the current owner
-    /// @dev Throws unless `lotteryActive` is false
-    function createLottery() public {
-        require(msg.sender == manager, "Only the manager can create the lottery");
-        require(lotteryActive == false, "Lottery already active");
         lotteryActive = true;
         emit LotteryCreated();
     }
@@ -130,7 +122,7 @@ contract Lottery {
             "Only the operator con do this operation"
         );
         require(lotteryActive, "Lottery is not active");
-        if (isRoundActive()) {
+        if (!roundFinished) {
             for (uint256 i = 0; i < tickets.length; i++) {
                 payable(tickets[i].owner).transfer(TICKET_PRICE);
             }

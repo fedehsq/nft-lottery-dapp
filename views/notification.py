@@ -3,6 +3,7 @@ from flask import (
     session,
 )
 from flask import jsonify
+from processors.contract import ContractProcessor
 from processors.lottery import LotteryProcessor
 from processors.nft import NftProcessor
 from app import COLLECTIBLES
@@ -17,7 +18,7 @@ def notifications():
     return: status 200 and json object of all notifications if any
     else 204 (no content / user not interested in the lottery)
     """
-    if not "starting_block" in session:
+    if not "starting_block" in session or not ContractProcessor.LOTTERY_DEPLOYED:
         return jsonify(status=204)
 
     events_entries = (
@@ -34,7 +35,7 @@ def notifications():
 
     events = []
     for e in events_entries:
-        print(e, "\n")
+        #print(e, "\n")
         block_id = e.blockNumber
         event = e.event
         args = e.args

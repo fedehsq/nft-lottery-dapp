@@ -7,6 +7,14 @@ class ContractProcessor:
     """
 
     ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
+    LOTTERY_DEPLOYED = False
+    ROUND_DURATION = 2
+
+    nft_address = None
+    nft_instance = None
+
+    lottery_address = None
+    lottery_instance = None
 
     @staticmethod
     def deploy_contract(contract_name, *constructor_args):
@@ -48,6 +56,34 @@ class ContractProcessor:
         # Initialize a contract instance object using the contract address which can be used to invoke contract functions
         contract_instance = w3.eth.contract(abi=abi, address=contract_address)
         return contract_address, contract_instance
+
+    @staticmethod
+    def deploy_contracts():
+        # Nft contract address and ABI
+        (
+            ContractProcessor.nft_address,
+            ContractProcessor.nft_instance,
+        ) = ContractProcessor.deploy_contract("NFT")
+
+        # Lottery contract address and ABI (pass Nft contract address as parameter)
+        (
+            ContractProcessor.lottery_address,
+            ContractProcessor.lottery_instance,
+        ) = ContractProcessor.deploy_contract(
+            "Lottery", ContractProcessor.nft_address, ContractProcessor.ROUND_DURATION
+        )
+        if (
+            ContractProcessor.lottery_address is not None
+            and ContractProcessor.lottery_instance is not None
+            and ContractProcessor.nft_address is not None
+            and ContractProcessor.nft_instance is not None
+        ):
+            ContractProcessor.LOTTERY_DEPLOYED = True
+            return True
+        return False
+
+        # Initialize the lottery filters for the events
+        # LotteryProcessor.init_filters()
 
     @staticmethod
     def create_transaction(_from: str, _to: str, _value: int):
