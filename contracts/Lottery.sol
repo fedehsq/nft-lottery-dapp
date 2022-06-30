@@ -61,13 +61,13 @@ contract Lottery {
     uint256 public roundDuration;
     uint256 private endRoundBlock = 0;
     uint256 private kParam = 0;
-    uint256 private tokenId = 0;
 
     bool private lotteryActive = false;
     bool private numbersExtracted = true;
     bool private roundFinished = true;
 
     uint256 public constant TICKET_PRICE = 1 ether;
+    uint256 public constant COLLECTIBLES_LENGTH = 1025;
 
     NFT private nft;
 
@@ -142,38 +142,6 @@ contract Lottery {
         emit LotteryClosed();
     }
 
-    /// @notice The lottery operator mints n nft.
-    /// @param nToken the number of nft to mint
-    function mintNtoken(uint256 nToken) public {
-        for (uint256 i = 0; i < nToken; i++) {
-            autoMint();
-        }
-    }
-
-    /// @notice The lottery operator can mint new token.
-    /// The name of the image is the tokenId.
-    /// @dev Throws unless `msg.sender` is the current owner
-    /// @dev Throws unless the lottery is active
-    function autoMint() public {
-        require(
-            msg.sender == manager,
-            "Only the operator con do this operation"
-        );
-        require(lotteryActive, "Lottery is not active");
-        tokenId++;
-        uint256 class = (tokenId % 8) + 1;
-        string memory image = string(
-            abi.encodePacked(
-                COLLECTIBLES_REPO,
-                Strings.toString(tokenId),
-                ".svg"
-            )
-        );
-        collectibles[class].push(Collectible(tokenId, image));
-        nft.mint(tokenId, image);
-        emit TokenMinted(address(this), tokenId, image);
-    }
-
     /// @notice The lottery operator can mint new token.
     /// The name of the image is the tokenId.
     /// @param _class the class of the collectible
@@ -189,17 +157,16 @@ contract Lottery {
         require(lotteryActive, "Lottery is not active");
         require(_class <= 8, "Class must be between 1 and 8");
         nft.mint(_tokenId, _collectible);
-        tokenId = _tokenId;
         uint256 class = _class;
         string memory image = string(
             abi.encodePacked(
                 COLLECTIBLES_REPO,
-                Strings.toString(tokenId),
+                Strings.toString(_tokenId),
                 ".svg"
             )
         );
-        collectibles[class].push(Collectible(tokenId, image));
-        emit TokenMinted(address(this), tokenId, image);
+        collectibles[class].push(Collectible(_tokenId, image));
+        emit TokenMinted(address(this), _tokenId, image);
     }
 
     /// @notice Buy 'random' tickets.
@@ -400,7 +367,8 @@ contract Lottery {
                 uint256 id = 0;
                 // if the class is empty, mint a new collectible for the winner
                 if (collectibles[classPrize].length == 0) {
-                    id = tokenId + 1;
+                    id = getFreeToken();
+                    require(id != 0, 'sold out');
                     mint(id, classPrize, string(
                         abi.encodePacked(
                             COLLECTIBLES_REPO,
@@ -410,7 +378,7 @@ contract Lottery {
                     ));
                     nft.transferFrom(address(this), tickets[i].owner, id);
                 } else {
-                    uint256 collectibleIndex = tokenId %
+                    uint256 collectibleIndex = endRoundBlock %
                         collectibles[classPrize].length;
                     id = collectibles[classPrize][collectibleIndex].id;
                     // check if the contract has the ability to transfer the collectible
@@ -422,7 +390,8 @@ contract Lottery {
                         nft.transferFrom(address(this), tickets[i].owner, id);
                     } else {
                         // mint a new collectible for the winner
-                        id = tokenId + 1;
+                        id = getFreeToken();
+                        require(id != 0, 'sold out');
                         mint(id, classPrize, string(
                             abi.encodePacked(
                                 COLLECTIBLES_REPO,
@@ -439,7 +408,7 @@ contract Lottery {
                     string(
                         abi.encodePacked(
                             COLLECTIBLES_REPO,
-                            Strings.toString(tokenId),
+                            Strings.toString(id),
                             ".svg"
                         )
                     ),
@@ -566,4 +535,16 @@ contract Lottery {
             );
         }
     }
+
+    /// @notice Search a free collectible
+    /// return the first free id
+    function getFreeToken() internal view returns (uint256) {
+        for (uint256 id = 1; id < COLLECTIBLES_LENGTH; id++) {
+            if (nft.ownerOf(id) == address(0)) {
+                return id;
+            }
+        }
+        return 0;
+    }
+
 }
